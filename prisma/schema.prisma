@@ -1,0 +1,231 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── Athlete profile (one row) ─────────────────────────────────────────────────
+model athlete_profile {
+  id                    Int       @id @default(autoincrement())
+  age                   Int?
+  sex                   String?
+  heightCm              Float?
+  weightKg              Float?
+  goalRace              String?
+  goalRaceDate          DateTime?
+  fitnessLevel          String?
+  injuryHistory         String?
+  hrZonesJson           String?
+  trainingPacesJson     String?
+  keyLiftLoadsJson      String?
+  plyoTier              Int?
+  plyoTierSource        String?
+  plyoTierConfidence    String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+// ── Calibration state (one row) ───────────────────────────────────────────────
+model calibration_state {
+  id                       Int      @id @default(autoincrement())
+  startedOn                DateTime?
+  windowEnd                DateTime?
+  recoveryBaselineReady    Boolean  @default(false)
+  anchorConfidenceJson     String?
+  graduated                Boolean  @default(false)
+  updatedAt                DateTime @updatedAt
+}
+
+// ── Field tests ───────────────────────────────────────────────────────────────
+model field_tests {
+  id              Int      @id @default(autoincrement())
+  type            String
+  date            DateTime
+  result          String
+  derivedEstimate String?
+  createdAt       DateTime @default(now())
+}
+
+// ── Readiness (one row per day from Garmin) ───────────────────────────────────
+model readiness_daily {
+  id                 Int      @id @default(autoincrement())
+  date               DateTime @unique
+  recoveryScore      Float?
+  hrv                Float?
+  hrvBaseline        Float?
+  rhr                Float?
+  rhrBaseline        Float?
+  sleepScore         Float?
+  sleepHours         Float?
+  bodyBattery        Float?
+  stress             Float?
+  trainingReadiness  Float?
+  createdAt          DateTime @default(now())
+}
+
+// ── Activities (every run from Garmin) ────────────────────────────────────────
+model activities {
+  id                Int      @id @default(autoincrement())
+  date              DateTime
+  type              String
+  durationMin       Float?
+  distanceKm        Float?
+  avgHr             Float?
+  maxHr             Float?
+  avgPaceSecPerKm   Float?
+  splits            String?
+  cadence           Float?
+  elevationM        Float?
+  trimp             Float?
+  decoupling        Float?
+  garminActivityId  String?  @unique
+  createdAt         DateTime @default(now())
+}
+
+// ── Session (today's prescription, editable) ─────────────────────────────────
+model session {
+  id               Int      @id @default(autoincrement())
+  date             DateTime @unique
+  status           String   @default("draft")
+  version          Int      @default(1)
+  blocksJson       String
+  sourceOfLastEdit String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ── Set logs (granular strength log) ─────────────────────────────────────────
+model set_logs {
+  id         Int      @id @default(autoincrement())
+  sessionId  Int
+  exerciseId String
+  setNumber  Int
+  weightKg   Float?
+  reps       Int?
+  rir        Int?
+  rpe        Float?
+  notes      String?
+  createdAt  DateTime @default(now())
+}
+
+// ── Edit history (every change to a session) ─────────────────────────────────
+model edit_history {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  version   Int
+  actor     String
+  diffJson  String
+  reason    String?
+  timestamp DateTime @default(now())
+}
+
+// ── Exercise library (strength exercises) ────────────────────────────────────
+model exercise_library {
+  id              String  @id
+  name            String
+  primaryMuscles  String
+  secondaryMuscles String
+  equipment       String
+  level           String?
+  mechanic        String?
+  force           String?
+  category        String?
+  instructions    String
+  images          String
+  muscleText      String?
+  rationale       String?
+  evidence        String?
+  source          String  @default("free-exercise-db")
+}
+
+// ── Plyo library ──────────────────────────────────────────────────────────────
+model plyo_library {
+  id              String  @id
+  name            String
+  intensity       String?
+  contactLoad     String?
+  progressionTier Int
+  prerequisites   String?
+  target          String?
+  videoUrl        String?
+  muscleText      String?
+  rationale       String?
+  evidence        String?
+}
+
+// ── Prehab library ────────────────────────────────────────────────────────────
+model prehab_library {
+  id            String  @id
+  name          String
+  bodyRegion    String
+  category      String
+  niggleTags    String
+  targetTissue  String?
+  videoUrl      String?
+  muscleText    String?
+  rationale     String?
+  evidence      String?
+}
+
+// ── Stretch library ───────────────────────────────────────────────────────────
+model stretch_library {
+  id          String  @id
+  name        String
+  type        String
+  target      String?
+  whenToUse   String
+  durationSec Int?
+  reps        Int?
+  muscleText  String?
+  rationale   String?
+}
+
+// ── Plan (periodized training plan) ──────────────────────────────────────────
+model plan {
+  id                         Int      @id @default(autoincrement())
+  goalRace                   String?
+  phase                      String?
+  weekInBlock                Int?
+  weeklyVolumeTargetKm       Float?
+  intensityDistributionJson  String?
+  updatedAt                  DateTime @updatedAt
+}
+
+// ── Planned session ───────────────────────────────────────────────────────────
+model planned_session {
+  id              Int      @id @default(autoincrement())
+  date            DateTime
+  modality        String
+  targetSpecJson  String?
+  priority        String   @default("B")
+  createdAt       DateTime @default(now())
+}
+
+// ── Preferences (learned + explicit user preferences) ─────────────────────────
+model preferences {
+  id         Int      @id @default(autoincrement())
+  rule       String
+  source     String
+  confidence Float    @default(1.0)
+  weight     Float    @default(1.0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ── Decision log (the agent's memory) ────────────────────────────────────────
+model decision_log {
+  id                     Int      @id @default(autoincrement())
+  date                   DateTime
+  recommendedSessionJson String
+  rationale              String?
+  readinessAtDecision    String?
+  wasFollowed            Boolean?
+  athleteOverride        String?
+  createdAt              DateTime @default(now())
+}

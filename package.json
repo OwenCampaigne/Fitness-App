@@ -11,13 +11,17 @@
     "test:ci": "jest --ci --coverage"
   },
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@types/web-push": "^3.6.4",
+    "better-sqlite3": "^12.11.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "garmin-connect": "^1.6.2",
     "jspdf": "^4.2.0",
     "lucide-react": "^0.414.0",
     "next": "14.2.5",
+    "prisma": "^7.8.0",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^2.12.7",
@@ -25,6 +29,7 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^18",

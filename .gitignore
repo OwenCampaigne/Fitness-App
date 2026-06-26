@@ -1,5 +1,6 @@
 .next/
 node_modules/
+.env
 .env.local
 .env*.local
 *.log
@@ -8,3 +9,9 @@ node_modules/
 
 # Claude Code project settings (contain personal tokens)
 .claude/
+
+/src/generated/prisma
+
+# Prisma SQLite database
+prisma/dev.db
+prisma/*.db-journal
