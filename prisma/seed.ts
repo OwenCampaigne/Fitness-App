@@ -26,7 +26,7 @@ async function main() {
 
   try {
     console.log(`Fetching exercises from ${EXERCISES_URL} ...`)
-    const response = await fetch(EXERCISES_URL)
+    const response = await fetch(EXERCISES_URL, { signal: AbortSignal.timeout(15000) })
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
