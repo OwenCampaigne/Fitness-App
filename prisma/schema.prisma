@@ -86,6 +86,8 @@ model activities {
   decoupling        Float?
   garminActivityId  String?  @unique
   createdAt         DateTime @default(now())
+
+  @@index([date])
 }
 
 // ── Session (today's prescription, editable) ─────────────────────────────────
@@ -112,6 +114,8 @@ model set_logs {
   rpe        Float?
   notes      String?
   createdAt  DateTime @default(now())
+
+  @@index([sessionId])
 }
 
 // ── Edit history (every change to a session) ─────────────────────────────────
@@ -123,6 +127,8 @@ model edit_history {
   diffJson  String
   reason    String?
   timestamp DateTime @default(now())
+
+  @@index([sessionId])
 }
 
 // ── Exercise library (strength exercises) ────────────────────────────────────
@@ -205,6 +211,8 @@ model planned_session {
   targetSpecJson  String?
   priority        String   @default("B")
   createdAt       DateTime @default(now())
+
+  @@index([date])
 }
 
 // ── Preferences (learned + explicit user preferences) ─────────────────────────
@@ -228,4 +236,6 @@ model decision_log {
   wasFollowed            Boolean?
   athleteOverride        String?
   createdAt              DateTime @default(now())
+
+  @@index([date])
 }
