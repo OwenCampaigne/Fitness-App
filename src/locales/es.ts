@@ -2,6 +2,7 @@ const es = {
   nav: {
     home: 'Inicio',
     sleep: 'Sueño',
+    exercises: 'Biblioteca',
     strain: 'Esfuerzo',
     trends: 'Tendencias',
     profile: 'Perfil',

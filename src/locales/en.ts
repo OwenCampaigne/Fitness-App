@@ -2,6 +2,7 @@ const en = {
   nav: {
     home: 'Home',
     sleep: 'Sleep',
+    exercises: 'Library',
     strain: 'Strain',
     trends: 'Trends',
     profile: 'Profile',
