@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { User, CheckCircle } from 'lucide-react';
 import type { UserProfile, Sex, FitnessLevel, Goal, WeightGoal } from '@/lib/types';
-import { calculateBMI } from '@/lib/benchmarks';
 import { clsx } from 'clsx';
 import { useLang } from '@/lib/i18n';
 
@@ -50,26 +49,11 @@ function OptionButton<T extends string>({
   );
 }
 
-function bmiColor(bmi: number): string {
-  if (bmi < 18.5) return '#38bdf8';
-  if (bmi < 25)   return '#4ade80';
-  if (bmi < 30)   return '#facc15';
-  if (bmi < 35)   return '#fb923c';
-  return '#f87171';
-}
-
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Props) {
   const { t } = useLang();
   const defaultCtaLabel = ctaLabel ?? t('profile.save');
 
-  function bmiLabel(bmi: number): string {
-    if (bmi < 18.5) return t('profile.bmiCategories.underweight');
-    if (bmi < 25)   return t('profile.bmiCategories.healthy');
-    if (bmi < 30)   return t('profile.bmiCategories.overweight');
-    if (bmi < 35)   return t('profile.bmiCategories.obese1');
-    return t('profile.bmiCategories.obese2');
-  }
 
   const [name, setName]               = useState(initial?.name ?? '');
   const [age, setAge]                 = useState(initial?.age?.toString() ?? '');
@@ -112,7 +96,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
     setUnitsState(newUnits);
   }
 
-  // Resolved metric values for BMI and save
+  // Resolved metric values for save
   const heightNum = units === 'imperial'
     ? ftInToCm(parseInt(heightFt, 10) || 0, parseInt(heightIn, 10) || 0)
     : parseInt(height, 10);
@@ -123,17 +107,6 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
   const ageNum  = parseInt(age, 10);
   const isValid = age !== '' && ageNum >= 10 && ageNum <= 100;
 
-  // Live BMI preview (always computed in metric)
-  const bmi = (heightNum >= 100 && weightNum > 0)
-    ? calculateBMI(weightNum, heightNum)
-    : 0;
-
-  // Healthy BMI weight range
-  const bmiMinKg = Math.round(18.5 * (heightNum / 100) ** 2 * 10) / 10;
-  const bmiMaxKg = Math.round(24.9 * (heightNum / 100) ** 2 * 10) / 10;
-  const bmiRangeStr = units === 'imperial'
-    ? t('profile.bmiRangeLbs', { min: kgToLbs(bmiMinKg), max: kgToLbs(bmiMaxKg) })
-    : t('profile.bmiRange', { min: bmiMinKg, max: bmiMaxKg });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,26 +260,6 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
         </div>
       )}
 
-      {/* Live BMI preview */}
-      {bmi > 0 && (
-        <div
-          className="rounded-xl px-4 py-3 flex items-center justify-between border"
-          style={{ borderColor: `${bmiColor(bmi)}40`, backgroundColor: `${bmiColor(bmi)}0d` }}
-        >
-          <div>
-            <p className="text-xs text-secondary">{t('profile.bmiCalculated')}</p>
-            <p className="text-xs text-muted mt-0.5">{bmiRangeStr}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xl font-black leading-none" style={{ color: bmiColor(bmi) }}>
-              {bmi}
-            </p>
-            <p className="text-xs font-semibold mt-0.5" style={{ color: bmiColor(bmi) }}>
-              {bmiLabel(bmi)}
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Weight goal — only shown when weight is entered */}
       {weightNum > 0 && (
