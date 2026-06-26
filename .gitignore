@@ -1,0 +1,10 @@
+.next/
+node_modules/
+.env.local
+.env*.local
+*.log
+.DS_Store
+.vercel
+
+# Claude Code project settings (contain personal tokens)
+.claude/
