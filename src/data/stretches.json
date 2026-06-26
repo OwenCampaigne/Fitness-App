@@ -1,0 +1,162 @@
+[
+  {
+    "id": "leg-swings-forward",
+    "name": "Leg Swings (Forward / Backward)",
+    "type": "dynamic",
+    "target": "hip flexors, hamstrings, glutes",
+    "whenToUse": "pre",
+    "reps": 12,
+    "muscleText": "Iliopsoas, hamstrings, glutes (gluteus maximus), hip capsule",
+    "rationale": "Forward leg swings progressively increase hip flexor and hamstring range of motion through momentum rather than held tension, making them ideal before running. They prime the hip for the full extension-to-flexion arc used in every stride."
+  },
+  {
+    "id": "leg-swings-lateral",
+    "name": "Leg Swings (Lateral / Side-to-Side)",
+    "type": "dynamic",
+    "target": "hip abductors, hip adductors, glute medius",
+    "whenToUse": "pre",
+    "reps": 12,
+    "muscleText": "Gluteus medius, hip adductors (groin), tensor fasciae latae",
+    "rationale": "Lateral leg swings mobilise the hip in the frontal plane, a direction that running drills and straight-line jogging largely ignore. Opening up hip abduction and adduction range prepares the hip stabilisers for uneven terrain and crosswind running."
+  },
+  {
+    "id": "hip-circles",
+    "name": "Hip Circles",
+    "type": "dynamic",
+    "target": "hip joint, hip flexors, hip rotators",
+    "whenToUse": "pre",
+    "reps": 10,
+    "muscleText": "Iliopsoas, gluteus medius, hip external rotators (piriformis), hip adductors",
+    "rationale": "Hip circles take the hip joint through its full circumferential range of motion, mobilising the joint capsule and surrounding soft tissue in all planes simultaneously. A few slow rotations each side markedly reduce hip stiffness before runs."
+  },
+  {
+    "id": "ankle-circles",
+    "name": "Ankle Circles",
+    "type": "dynamic",
+    "target": "ankle joint, plantar fascia, peroneals",
+    "whenToUse": "pre",
+    "reps": 10,
+    "muscleText": "Calves (gastrocnemius, soleus), tibialis anterior, peroneus longus and brevis, plantar fascia",
+    "rationale": "Ankle circles mobilise the talocrural and subtalar joints before running, reducing stiffness that accumulates from sedentary periods and previous training loads. A mobile ankle reduces the compensatory stress placed on the knee and hip."
+  },
+  {
+    "id": "high-knees-dynamic",
+    "name": "High Knees",
+    "type": "dynamic",
+    "target": "hip flexors, calves, core",
+    "whenToUse": "pre",
+    "reps": 20,
+    "muscleText": "Iliopsoas, quadriceps, calves, core stabilisers",
+    "rationale": "High knees elevate heart rate and body temperature while reinforcing the high hip-drive mechanics needed for efficient running form. Performed as a dynamic warmup they prime the nervous system and hip flexors for the demands ahead."
+  },
+  {
+    "id": "butt-kicks-dynamic",
+    "name": "Butt Kicks",
+    "type": "dynamic",
+    "target": "hamstrings, knee flexion, cadence",
+    "whenToUse": "pre",
+    "reps": 20,
+    "muscleText": "Hamstrings (biceps femoris, semitendinosus, semimembranosus), calves",
+    "rationale": "Butt kicks actively stretch and then contract the hamstrings through rapid knee flexion, reinforcing the cyclical recovery phase of the running stride. They also increase cadence awareness and elevate muscle temperature before hard efforts."
+  },
+  {
+    "id": "lateral-shuffles",
+    "name": "Lateral Shuffles",
+    "type": "dynamic",
+    "target": "hip abductors, adductors, ankle stability",
+    "whenToUse": "pre",
+    "reps": 10,
+    "muscleText": "Gluteus medius, hip adductors, quadriceps, calves",
+    "rationale": "Lateral shuffles activate the hip abductors and adductors that stabilise the pelvis during single-leg stance in running. Adding lateral movement to a warmup exposes hip-stability weaknesses before they become running-form problems."
+  },
+  {
+    "id": "worlds-greatest-stretch",
+    "name": "World's Greatest Stretch",
+    "type": "dynamic",
+    "target": "hip flexors, thoracic spine, hamstrings, adductors",
+    "whenToUse": "pre",
+    "reps": 5,
+    "muscleText": "Iliopsoas, gluteus maximus, hamstrings, hip adductors, thoracic erectors, shoulders",
+    "rationale": "The World's Greatest Stretch earns its name by moving through hip flexion, thoracic rotation, and hamstring loading in one integrated sequence. It is the most time-efficient single warmup movement for runners who need to mobilise the full kinetic chain quickly."
+  },
+  {
+    "id": "standing-quad-stretch",
+    "name": "Standing Quad Stretch",
+    "type": "static",
+    "target": "quadriceps, hip flexors, knee",
+    "whenToUse": "post",
+    "durationSec": 30,
+    "muscleText": "Quadriceps (rectus femoris, vastus lateralis, vastus medialis), iliopsoas",
+    "rationale": "The quadriceps absorb enormous eccentric load during downhill running and each footstrike. Holding a static quad stretch after running helps restore resting muscle length and reduce post-run soreness in the thigh."
+  },
+  {
+    "id": "standing-calf-stretch",
+    "name": "Standing Calf Stretch (Gastrocnemius)",
+    "type": "static",
+    "target": "gastrocnemius, Achilles tendon",
+    "whenToUse": "post",
+    "durationSec": 30,
+    "muscleText": "Gastrocnemius, Achilles tendon",
+    "rationale": "The gastrocnemius stiffens considerably during runs, especially at faster paces and on hilly terrain. A post-run wall calf stretch, held for 30 seconds, helps restore dorsiflexion range of motion and reduce next-day Achilles tightness."
+  },
+  {
+    "id": "seated-hamstring-stretch",
+    "name": "Seated Hamstring Stretch",
+    "type": "static",
+    "target": "hamstrings, lumbar spine",
+    "whenToUse": "post",
+    "durationSec": 30,
+    "muscleText": "Hamstrings (biceps femoris, semitendinosus, semimembranosus), gluteus maximus, lumbar fascia",
+    "rationale": "Sitting on the floor with legs extended and hinging forward from the hips stretches the hamstrings in a joint-friendly position. Post-run hamstring flexibility work helps counter the hip-flexion bias that accumulates in runners who also sit for work."
+  },
+  {
+    "id": "pigeon-pose",
+    "name": "Pigeon Pose (Hip Flexor / Piriformis)",
+    "type": "static",
+    "target": "hip flexors, piriformis, glutes",
+    "whenToUse": "post",
+    "durationSec": 60,
+    "muscleText": "Piriformis, iliopsoas, rectus femoris, gluteus maximus, hip capsule",
+    "rationale": "Pigeon pose simultaneously stretches the hip flexors of the rear leg and the deep external rotators (piriformis) of the front leg, making it one of the most comprehensive hip-release stretches for runners. Hold for at least 60 seconds to allow connective tissue to relax."
+  },
+  {
+    "id": "doorway-pec-stretch",
+    "name": "Doorway Pec Stretch",
+    "type": "static",
+    "target": "pectorals, anterior deltoid, shoulder",
+    "whenToUse": "post",
+    "durationSec": 30,
+    "muscleText": "Pectoralis major, pectoralis minor, anterior deltoid, biceps (long head)",
+    "rationale": "Runners who run with arms crossing the midline often develop tight pectorals that pull the shoulders forward, reducing thoracic rotation and arm swing efficiency. A doorway pec stretch counteracts the forward-rounded posture encouraged by both running and desk work."
+  },
+  {
+    "id": "seated-figure-4",
+    "name": "Seated Figure-4 (Glute / Piriformis Stretch)",
+    "type": "static",
+    "target": "glutes, piriformis, external hip rotators",
+    "whenToUse": "post",
+    "durationSec": 45,
+    "muscleText": "Gluteus maximus, piriformis, obturator externus, gemellus superior and inferior",
+    "rationale": "Crossing one ankle over the opposite knee targets the deep gluteal muscles and piriformis that run through the sciatic notch. This stretch is particularly valuable for runners who feel tightness deep in the buttock or early signs of piriformis irritation."
+  },
+  {
+    "id": "lying-knee-to-chest",
+    "name": "Lying Knee-to-Chest",
+    "type": "static",
+    "target": "glutes, low back, hip flexors",
+    "whenToUse": "recovery",
+    "durationSec": 30,
+    "muscleText": "Gluteus maximus, erector spinae, lumbar multifidus, piriformis",
+    "rationale": "Pulling one knee gently toward the chest while lying supine decompresses the lumbar spine and releases gluteal and hip rotator tension accumulated during running. It is a gentle enough stretch for daily recovery use, even on easy days."
+  },
+  {
+    "id": "chest-opener",
+    "name": "Chest Opener (Arms Behind Back / Interlaced)",
+    "type": "static",
+    "target": "pectorals, anterior shoulders, thoracic spine",
+    "whenToUse": "recovery",
+    "durationSec": 30,
+    "muscleText": "Pectoralis major and minor, anterior deltoid, biceps, thoracic erectors",
+    "rationale": "Interlacing the hands behind the back and lifting while depressing the shoulders actively opens the chest and extends the thoracic spine into the position running tends to take it away from. A simple daily chest opener helps maintain the upright posture runners need to breathe efficiently at race pace."
+  }
+]
