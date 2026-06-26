@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "node16",
+    "noEmit": false,
+    "esModuleInterop": true,
+    "outDir": ".seed-out"
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["prisma/seed.ts", "src/generated/prisma/**/*"]
+}
