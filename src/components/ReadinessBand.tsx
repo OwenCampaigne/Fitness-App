@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import type { ReadinessResult } from '@/types/readiness'
 import PainStatusModal from './PainStatusModal'
@@ -34,13 +35,14 @@ interface Props {
 
 export default function ReadinessBand({ result, scenarioMode }: Props) {
   const [showPainModal, setShowPainModal] = useState(false)
+  const router = useRouter()
   const config = BAND_CONFIG[result.band]
 
   const lastSynced = result.lastSyncedAt
     ? formatDistanceToNow(new Date(result.lastSyncedAt), { addSuffix: true })
     : 'never'
 
-  const painCurrent = result.painFlagged ? 'yes' : 'none'
+  const painCurrent = result.currentPainLevel ?? (result.painFlagged ? 'yes' : 'none')
 
   return (
     <>
@@ -143,7 +145,7 @@ export default function ReadinessBand({ result, scenarioMode }: Props) {
           onClose={() => setShowPainModal(false)}
           onSaved={() => {
             setShowPainModal(false)
-            window.location.reload()
+            router.refresh()
           }}
         />
       )}

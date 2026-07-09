@@ -3,7 +3,6 @@ import { format } from 'date-fns'
 import { prisma } from '@/lib/db'
 import { computeReadiness } from '@/lib/readiness'
 import { getScenario } from '@/lib/scenario'
-import { syncGarmin } from '@/lib/syncGarmin'
 import BottomNav from '@/components/BottomNav'
 import ReadinessBand from '@/components/ReadinessBand'
 
@@ -15,14 +14,6 @@ export default async function HomePage() {
   // Scenario mode: skip DB entirely
   const scenario = getScenario()
   const scenarioMode = scenario ? (process.env.SCENARIO ?? undefined) : undefined
-
-  // Bootstrap: first visit with empty DB → sync once
-  if (!scenario) {
-    const rowCount = await prisma.readiness_daily.count()
-    if (rowCount === 0) {
-      await syncGarmin(format(new Date(), 'yyyy-MM-dd'))
-    }
-  }
 
   const result = scenario ?? (await computeReadiness())
   const today = format(new Date(), 'EEEE, MMM d')

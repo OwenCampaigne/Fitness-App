@@ -1,6 +1,6 @@
 import { prisma } from './db'
 import { format, subDays, differenceInDays } from 'date-fns'
-import type { ReadinessBand, ReadinessResult, ReadinessSignals, CalibrationStatus } from '../types/readiness'
+import type { ReadinessBand, ReadinessResult, ReadinessSignals, CalibrationStatus, PainLevel } from '../types/readiness'
 
 // ── Exported interfaces (used by tests without importing Prisma types) ────────
 
@@ -204,6 +204,7 @@ export async function computeReadiness(): Promise<ReadinessResult> {
     calibration: calibrationStatus,
     daysUntilCalibrated: isInCalibrationWindow ? daysUntilCalibrated : null,
     painFlagged,
+    currentPainLevel: (profile?.currentPainLevel ?? 'none') as PainLevel,
     provisional: isInCalibrationWindow,
     lastSyncedAt: lastRow ? new Date(lastRow.date).toISOString() : null,
     sleepHours: todayRow?.sleepHours ?? null,

@@ -19,16 +19,21 @@ interface Props {
 export default function PainStatusModal({ current, onClose, onSaved }: Props) {
   const [selected, setSelected] = useState<PainLevel>(current)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSave() {
     setSaving(true)
+    setError(null)
     try {
-      await fetch('/api/profile', {
+      const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPainLevel: selected }),
       })
+      if (!res.ok) throw new Error(`Save failed (${res.status})`)
       onSaved()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed')
     } finally {
       setSaving(false)
     }
@@ -74,6 +79,8 @@ export default function PainStatusModal({ current, onClose, onSaved }: Props) {
             </button>
           ))}
         </div>
+
+        {error && <p className="text-xs text-recovery-red">{error}</p>}
 
         <button
           type="button"

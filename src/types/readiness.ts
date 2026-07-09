@@ -17,6 +17,7 @@ export interface ReadinessResult {
   calibration: CalibrationStatus
   daysUntilCalibrated: number | null
   painFlagged: boolean
+  currentPainLevel?: PainLevel
   provisional: boolean
   lastSyncedAt: string | null  // ISO date string of most recent DB row
   // Secondary display stats
