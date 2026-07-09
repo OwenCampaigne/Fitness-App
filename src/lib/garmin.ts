@@ -158,6 +158,8 @@ function parseActivities(raw: unknown[]): ActivityData[] {
     const maxHR = (act.maxHR ?? act.maxHeartRateInBeatsPerMinute ?? 0) as number;
     const dur = (act.duration ?? act.movingDuration ?? 0) as number;
     const type = act.activityType as Record<string, unknown> | undefined;
+    const rawId = act.activityId ?? (act.activitySummaryDTO as Record<string, unknown> | undefined)?.activityId;
+    const garminActivityId = rawId ? String(rawId) : undefined;
     return {
       name: (act.activityName ?? act.name ?? 'Activity') as string,
       duration: dur,
@@ -166,6 +168,7 @@ function parseActivities(raw: unknown[]): ActivityData[] {
       averageHR: avgHR,
       maxHR,
       type: (type?.typeKey ?? type?.key ?? 'other') as string,
+      garminActivityId,
     };
   });
 }
