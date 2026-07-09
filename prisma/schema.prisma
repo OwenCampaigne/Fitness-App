@@ -29,6 +29,8 @@ model athlete_profile {
   plyoTierConfidence    String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  currentPainLevel      String    @default("none")
+  recoveryContextJson   String?
 }
 
 // ── Calibration state (one row) ───────────────────────────────────────────────
