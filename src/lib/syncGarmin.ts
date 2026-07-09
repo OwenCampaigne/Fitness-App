@@ -50,6 +50,7 @@ export async function syncGarmin(dateStr: string): Promise<SyncResult> {
   // Upsert activities
   let activitiesCount = 0
   for (const act of metrics.activities) {
+    // TODO: synthetic fallback ID can drift if Garmin recalculates duration — upsert idempotency mitigates but doesn't prevent orphan rows
     const syntheticId =
       act.garminActivityId ?? `${dateStr}_${act.type}_${Math.round(act.duration)}`
     await prisma.activities.upsert({

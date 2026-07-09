@@ -43,7 +43,7 @@ export interface ActivityData {
   averageHR: number;
   maxHR: number;
   type: string;
-  garminActivityId?: string;  // add this line
+  garminActivityId?: string;
 }
 
 export interface RecoveryData {
