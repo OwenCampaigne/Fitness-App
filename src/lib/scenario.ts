@@ -77,7 +77,7 @@ export const SCENARIOS: Record<string, ReadinessResult> = {
     plainText: 'Take it easy today',
     painFlagged: true,
     signals: { hrvRatio: 1.02, rhrDelta: 0, sleepScore: 80, acwr: 0.9 },
-    decidingSignals: ['Knee pain flagged', 'HRV 1.02×'],
+    decidingSignals: ['Pain flagged', 'HRV 1.02×'],
   },
 }
 

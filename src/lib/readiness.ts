@@ -48,13 +48,14 @@ export function computeSignals(
   age: number,
 ): ReadinessSignals {
   const todayStr = format(today, 'yyyy-MM-dd')
-  const validHRV = rows.filter(r => r.hrv !== null && r.hrv! > 0).map(r => r.hrv!)
-  const validRHR = rows.filter(r => r.rhr !== null && r.rhr! > 0).map(r => r.rhr!)
+  const todayRow = rows.find(r => format(new Date(r.date), 'yyyy-MM-dd') === todayStr)
+  const historicalRows = rows.filter(r => format(new Date(r.date), 'yyyy-MM-dd') !== todayStr)
+
+  const validHRV = historicalRows.filter(r => r.hrv !== null && r.hrv! > 0).map(r => r.hrv!)
+  const validRHR = historicalRows.filter(r => r.rhr !== null && r.rhr! > 0).map(r => r.rhr!)
 
   const medianHRV = computeMedian(validHRV)
   const medianRHR = computeMedian(validRHR)
-
-  const todayRow = rows.find(r => format(new Date(r.date), 'yyyy-MM-dd') === todayStr)
 
   const lastNightHRV = (todayRow?.hrv && todayRow.hrv > 0)
     ? todayRow.hrv
@@ -90,7 +91,7 @@ export function computeSignals(
   return {
     hrvRatio: Math.round(hrvRatio * 100) / 100,
     rhrDelta: Math.round(rhrDelta * 10) / 10,
-    sleepScore: sleepScore ?? 50,
+    sleepScore: sleepScore,
     acwr: Math.round(acwr * 100) / 100,
   }
 }
@@ -123,7 +124,7 @@ export function getDecidingSignals(
   painFlagged: boolean,
 ): [string, string] {
   if (painFlagged) {
-    return ['Knee pain flagged', `HRV ${signals.hrvRatio.toFixed(2)}×`]
+    return ['Pain flagged', `HRV ${signals.hrvRatio.toFixed(2)}×`]
   }
 
   // Score each signal by how far it deviates from ideal, normalized to red thresholds
@@ -152,7 +153,7 @@ export function getPlainText(band: ReadinessBand): string {
 
 export async function computeReadiness(): Promise<ReadinessResult> {
   const today = new Date()
-  const cutoff28 = subDays(today, 28)
+  const cutoff28 = subDays(today, 27)
 
   const [rows, activityRows, calibration, profile] = await Promise.all([
     prisma.readiness_daily.findMany({
@@ -163,8 +164,8 @@ export async function computeReadiness(): Promise<ReadinessResult> {
       where: { date: { gte: cutoff28 } },
       orderBy: { date: 'asc' },
     }),
-    prisma.calibration_state.findFirst(),
-    prisma.athlete_profile.findFirst(),
+    prisma.calibration_state.findFirst({ orderBy: { id: 'desc' } }),
+    prisma.athlete_profile.findFirst({ orderBy: { id: 'desc' } }),
   ])
 
   const age = profile?.age ?? 30
