@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[/api/profile POST]', err instanceof Error ? err.message : String(err))
+    return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 })
   }
 }
 
@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest) {
     })
     return NextResponse.json({ ok: true })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[/api/profile PATCH]', err instanceof Error ? err.message : String(err))
+    return NextResponse.json({ error: 'Failed to update pain level' }, { status: 500 })
   }
 }

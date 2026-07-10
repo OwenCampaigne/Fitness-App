@@ -53,6 +53,13 @@ export default function OnboardingPage() {
   const screen1Valid =
     s1.age !== '' && parseInt(s1.age, 10) >= 10 && parseInt(s1.age, 10) <= 100
 
+  const screen2Valid =
+    s2.surgeryYear !== '' &&
+    s2.surgeryMonth !== '' &&
+    parseInt(s2.surgeryYear, 10) >= 2020 &&
+    parseInt(s2.surgeryMonth, 10) >= 1 &&
+    parseInt(s2.surgeryMonth, 10) <= 12
+
   async function handleSubmit() {
     setSaving(true)
     setError(null)
@@ -160,8 +167,8 @@ export default function OnboardingPage() {
                   value={s2.surgeryYear}
                   onChange={e => setS2(p => ({ ...p, surgeryYear: e.target.value }))}
                   placeholder="Year (2025)"
-                  min={2020}
-                  max={2030}
+                  min={2015}
+                  max={new Date().getFullYear()}
                   className="flex-1 bg-surface border border-border rounded-xl px-3 py-3 text-sm text-primary placeholder:text-muted focus:outline-none focus:border-primary/50"
                 />
                 <input
@@ -236,7 +243,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={saving}
+                disabled={saving || !screen2Valid}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-bg font-bold text-sm disabled:opacity-40"
               >
                 <CheckCircle size={16} />
