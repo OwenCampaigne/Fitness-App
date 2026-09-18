@@ -100,6 +100,13 @@ model session {
   version          Int      @default(1)
   blocksJson       String
   sourceOfLastEdit String?
+  // Load currency (framework §3): session load = duration(min) x sRPE(0-10).
+  plannedDurationMin Float?
+  plannedLoad        Float?
+  actualDurationMin  Float?
+  srpe               Float?
+  actualLoad         Float?
+  completedAt        DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
@@ -115,9 +122,19 @@ model set_logs {
   rir        Int?
   rpe        Float?
   notes      String?
+  // Phase 4/5: the same table logs plyo contacts and prehab/stretch holds.
+  itemId     String?
+  itemKind   String   @default("exercise")
+  contacts   Int?
+  holdSec    Int?
+  // Plyo execution quality: both drive the tier anchor, and neither is derivable
+  // from load. Previously encoded as a tagged prefix in `notes`.
+  cleanExecution  Boolean?
+  sorenessNextDay Int?
   createdAt  DateTime @default(now())
 
   @@index([sessionId])
+  @@index([itemId])
 }
 
 // ── Edit history (every change to a session) ─────────────────────────────────
@@ -128,9 +145,14 @@ model edit_history {
   actor     String
   diffJson  String
   reason    String?
+  // A move spans two sessions: an add on the destination and a remove on the
+  // source. Undoing one alone leaves the item on both days or on neither, so
+  // the pair shares a groupId and must be reversed together.
+  groupId   String?
   timestamp DateTime @default(now())
 
   @@index([sessionId])
+  @@index([groupId])
 }
 
 // ── Exercise library (strength exercises) ────────────────────────────────────
@@ -224,8 +246,21 @@ model preferences {
   source     String
   confidence Float    @default(1.0)
   weight     Float    @default(1.0)
+  // The preference graph: what the rule is about, where it came from, and what
+  // it replaced. A preference stated in chat months ago may no longer be true,
+  // so supersession is first-class rather than a silent overwrite.
+  scope         String?
+  subject       String?
+  sourceQuote   String?
+  statedOn      DateTime?
+  supersededById Int?
+  active        Boolean  @default(true)
+  confirmedAt   DateTime?
+  lastAppliedOn DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([active, scope])
 }
 
 // ── Decision log (the agent's memory) ────────────────────────────────────────
@@ -240,4 +275,96 @@ model decision_log {
   createdAt              DateTime @default(now())
 
   @@index([date])
+}
+
+// -- Niggle tracker (Phase 4, framework SS9) ----------------------------------
+// Self-reported soreness/irritation. Descriptive only -- never a diagnosis (SS15).
+model niggle_log {
+  id              Int       @id @default(autoincrement())
+  date            DateTime
+  bodyRegion      String
+  side            String?
+  severity        Int
+  quality         String?
+  notes           String?
+  status          String    @default("active")
+  firstReportedOn DateTime
+  resolvedOn      DateTime?
+  escalatedOn     DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([date])
+  @@index([bodyRegion, status])
+}
+
+// -- Garmin structured-workout write-back log (Phase 6) -----------------------
+model garmin_push_log {
+  id               Int      @id @default(autoincrement())
+  sessionId        Int
+  date             DateTime
+  status           String
+  garminWorkoutId  String?
+  payloadJson      String?
+  error            String?
+  createdAt        DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+// -- Personal records / maxes (lifts and runs) --------------------------------
+// Dated on purpose: a 5k PR from two years ago is not evidence of today's
+// fitness, and the engine must be able to discount by age rather than treat
+// every record as current.
+model personal_records {
+  id          Int      @id @default(autoincrement())
+  kind        String
+  subjectId   String
+  label       String
+  value       Float
+  unit        String
+  reps        Int?
+  achievedOn  DateTime
+  source      String   @default("logged")
+  sessionId   Int?
+  verified    Boolean  @default(false)
+  supersededById Int?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([kind, subjectId, achievedOn])
+}
+
+// -- Clearance history --------------------------------------------------------
+// Clearance changes as rehab progresses. Keeping the history means the app can
+// show when a restriction lifted and who lifted it, instead of only the latest
+// snapshot inside recoveryContextJson.
+model clearance_history {
+  id             Int      @id @default(autoincrement())
+  recordedOn     DateTime
+  clearanceJson  String
+  stage          String
+  setBy          String
+  sourceQuote    String?
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  @@index([recordedOn])
+}
+
+// -- Weekly training summary --------------------------------------------------
+// A rolled-up week, written once the week closes, so trend and history views do
+// not re-derive from every set log each time they render.
+model week_summary {
+  id             Int      @id @default(autoincrement())
+  weekStart      DateTime @unique
+  totalLoad      Float?
+  runKm          Float?
+  runMinutes     Float?
+  strengthSets   Int?
+  plyoContacts   Int?
+  sessionsPlanned Int?
+  sessionsDone   Int?
+  acwrEnd        Float?
+  summaryJson    String?
+  createdAt      DateTime @default(now())
 }
