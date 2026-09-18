@@ -1,0 +1,38 @@
+# ── Running on AI — systemd unit ──────────────────────────────────────────────
+# Install:
+#   sudo cp deploy/fitness-app.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now fitness-app
+# Logs:
+#   journalctl -u fitness-app -f
+
+[Unit]
+Description=Running on AI — training coach
+# Wants network, but must not die if the Pi boots before DHCP settles.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=owen
+WorkingDirectory=/home/owen/fitness-app
+Environment=NODE_ENV=production
+Environment=PORT=3030
+ExecStart=/usr/bin/npm run start
+
+# The DB is a file on disk; give it a moment to flush rather than SIGKILLing
+# mid-write. SQLite is crash-safe, but a clean stop is still cheaper.
+KillSignal=SIGINT
+TimeoutStopSec=20
+
+Restart=on-failure
+RestartSec=5
+
+# A single-user app has no business reaching outside its own directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/owen/fitness-app
+
+[Install]
+WantedBy=multi-user.target
