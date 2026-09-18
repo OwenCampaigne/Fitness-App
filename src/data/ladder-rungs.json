@@ -1,0 +1,15 @@
+[
+  { "index": 0, "label": "1 min run / 4 min walk × 6", "runSec": 60, "walkSec": 240, "reps": 6, "continuous": false },
+  { "index": 1, "label": "1 min run / 3 min walk × 7", "runSec": 60, "walkSec": 180, "reps": 7, "continuous": false },
+  { "index": 2, "label": "2 min run / 3 min walk × 6", "runSec": 120, "walkSec": 180, "reps": 6, "continuous": false },
+  { "index": 3, "label": "2 min run / 2 min walk × 7", "runSec": 120, "walkSec": 120, "reps": 7, "continuous": false },
+  { "index": 4, "label": "3 min run / 2 min walk × 6", "runSec": 180, "walkSec": 120, "reps": 6, "continuous": false },
+  { "index": 5, "label": "4 min run / 2 min walk × 5", "runSec": 240, "walkSec": 120, "reps": 5, "continuous": false },
+  { "index": 6, "label": "5 min run / 2 min walk × 5", "runSec": 300, "walkSec": 120, "reps": 5, "continuous": false },
+  { "index": 7, "label": "6 min run / 1 min walk × 5", "runSec": 360, "walkSec": 60, "reps": 5, "continuous": false },
+  { "index": 8, "label": "8 min run / 1 min walk × 4", "runSec": 480, "walkSec": 60, "reps": 4, "continuous": false },
+  { "index": 9, "label": "10 min run / 1 min walk × 3", "runSec": 600, "walkSec": 60, "reps": 3, "continuous": false },
+  { "index": 10, "label": "12 min run / 1 min walk × 3", "runSec": 720, "walkSec": 60, "reps": 3, "continuous": false },
+  { "index": 11, "label": "15 min run / 1 min walk × 2", "runSec": 900, "walkSec": 60, "reps": 2, "continuous": false },
+  { "index": 12, "label": "20 min continuous", "runSec": 1200, "walkSec": 0, "reps": 1, "continuous": true }
+]

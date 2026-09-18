@@ -1,0 +1,45 @@
+{
+  "id": "msg_fixture_missing",
+  "type": "message",
+  "role": "assistant",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "t1",
+      "name": "propose_session_patch",
+      "input": {
+        "readinessBand": "amber",
+        "decidingSignals": [
+          "HRV 42 ms against a 51 ms baseline",
+          "6.1 h sleep"
+        ],
+        "today": "Warmup 10 min, then 30 min easy, then calf work.",
+        "why": "HRV is down and sleep was short, so today holds the aerobic work and drops the intensity.",
+        "itemWhy": [
+          {
+            "itemId": "run-easy",
+            "why": "Kept, but shortened — the aerobic stimulus survives a trim better than the week survives a dug hole."
+          },
+          {
+            "itemId": "calf-1",
+            "why": "Here because you logged the left calf at 3/10 and this is the load it tolerates."
+          }
+        ],
+        "changed": "Easy run cut from 45 to 30 minutes.",
+        "flag": "nothing to action",
+        "ops": [
+          {
+            "op": "modify",
+            "itemId": "run-easy",
+            "params": {
+              "kind": "run",
+              "durationMin": 30
+            },
+            "reason": "Short night and a down HRV — 30 minutes keeps the habit without the cost."
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "msg_fixture_diag",
+  "type": "message",
+  "role": "assistant",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "t1",
+      "name": "propose_session_patch",
+      "input": {
+        "readinessBand": "amber",
+        "decidingSignals": [
+          "HRV 42 ms against a 51 ms baseline",
+          "6.1 h sleep"
+        ],
+        "today": "Warmup 10 min, then 30 min easy, then calf work.",
+        "why": "HRV is down and sleep was short, so today holds the aerobic work and drops the intensity.",
+        "itemWhy": [
+          {
+            "itemId": "calf-1",
+            "why": "This is the standard eccentric protocol for Achilles tendinopathy."
+          }
+        ],
+        "changed": "Easy run cut from 45 to 30 minutes.",
+        "week": "Sunday long run unchanged; Thursday tempo moves to Friday if HRV has not recovered.",
+        "flag": "nothing to action",
+        "ops": []
+      }
+    }
+  ]
+}
