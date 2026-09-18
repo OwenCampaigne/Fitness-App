@@ -10,8 +10,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=owen
-WorkingDirectory=/home/owen
+User=campao
+WorkingDirectory=/home/campao
 # Loopback only. The inference plane is unauthenticated by default, and this
 # machine sits on a home network with whatever else is on it.
 Environment=OMNIROUTE_SERVER_HOST=127.0.0.1

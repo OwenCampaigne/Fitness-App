@@ -4,7 +4,7 @@ A Pi 5 with 16 GB is comfortably more machine than this needs. One user, a
 SQLite file, a handful of requests a day. The build is the only part that works
 the CPU, and it takes two or three minutes.
 
-Everything below assumes user `owen` and `~/fitness-app`. Change both in the
+Everything below assumes user `campao` and `~/fitness-app`. Change both in the
 service files if yours differ.
 
 ---
@@ -54,7 +54,7 @@ history. Copy it from the laptop:
 
 ```bash
 # on the laptop
-scp "prisma/dev.db" owen@raspberrypi.local:~/fitness-app/prisma/dev.db
+scp "prisma/dev.db" campao@rasberrypi.local:~/fitness-app/prisma/dev.db
 ```
 
 Then on the Pi:
@@ -112,7 +112,7 @@ sudo tailscale up
 ```
 
 Install Tailscale on your phone, sign in with the same account, and the app is
-at `http://raspberrypi:3030`. Add it to your home screen and the PWA installs.
+at `http://rasberrypi:3030`. Add it to your home screen and the PWA installs.
 
 Note the PWA's service worker and push notifications want HTTPS. Tailscale
 Serve gives you a real certificate:
@@ -133,7 +133,7 @@ crontab -e
 0 6,12,21 * * * curl -fsS "http://localhost:3030/api/sync?secret=YOUR_CRON_SECRET" >/dev/null
 
 # Database backup at 3am, 30 kept.
-0 3 * * * /home/owen/fitness-app/deploy/backup.sh >> /home/owen/backup.log 2>&1
+0 3 * * * /home/campao/fitness-app/deploy/backup.sh >> /home/campao/backup.log 2>&1
 ```
 
 The app never calls Garmin in a request path — it reads SQLite, and the sync

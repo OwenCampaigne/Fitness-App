@@ -13,8 +13,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=owen
-WorkingDirectory=/home/owen/fitness-app
+User=campao
+WorkingDirectory=/home/campao/fitness-app
 Environment=NODE_ENV=production
 Environment=PORT=3030
 ExecStart=/usr/bin/npm run start
@@ -32,7 +32,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
-ReadWritePaths=/home/owen/fitness-app
+ReadWritePaths=/home/campao/fitness-app
 
 [Install]
 WantedBy=multi-user.target
