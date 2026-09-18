@@ -263,6 +263,39 @@ Applied across all 13 pages. Zero `rounded-2xl` or `tracking-widest` remain.
   `/exercises` linked from `/profile`, `/week` and `/strength`. Nothing is
   orphaned — verify that before changing the nav again.
 
+## Scope change — 2026-09-18, agreed with Owen
+
+The framework describes a **running** app: strength exists to support the run
+(§8), and the whole thing is organised around post-surgical knee rehab. That
+was correct when it was written. It is no longer what this athlete needs, and
+the code is diverging from the spec **deliberately** — not drifting.
+
+**What changed and why:**
+
+1. **Push / pull / legs, not runner accessories.** `key-lifts.json` held 20
+   lifts and every one was lower-body or trunk — no bench, no row, no press.
+   So every session the allocator produced was legs, correctly, from a catalog
+   that could not produce anything else. Squat, bench and deadlift are now the
+   benchmark anchors, with running and prehab woven into the split.
+
+2. **Rehab is context, not the spine.** Owen is through rehab. The ladder,
+   clearance gating and stage machine all stay and still behave identically —
+   they are right for someone in rehab and §15 still binds. What changed is
+   prominence: a free-text injury history the athlete brain-dumps into, fed to
+   the coach as *context* rather than parsed into rules, because extracting
+   constraints from prose is how you get a confident wrong answer about
+   someone's knee. Anything that gates training still comes from clearance or
+   a logged niggle.
+
+3. **The coach was invisible.** It rendered at the bottom of the Today screen
+   below the whole card stack and read as furniture. It is the headline Phase 6
+   feature and the athlete could not find it.
+
+**If you are a future session reading `RUNNING-ON-AI-Framework.md`:** §8's
+"strength for runners" framing is superseded. The safety architecture, load
+currency, edit funnel and honesty principles are all unchanged and still
+authoritative.
+
 ## Phase 7 — scoped, not started
 
 Added 2026-09-17. Full scope: `docs/superpowers/specs/2026-09-17-phase7-catalog-enrichment-scope.md`
