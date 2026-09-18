@@ -4,7 +4,7 @@
 
 A recovery-driven training system built on top of the garmin-health-dashboard. It tells you the single best thing to do today across running, lifting, plyos, and prehab — calibrated to your real numbers, explained exercise-by-exercise, and editable in one sentence by you or the AI coach.
 
-Full spec: `../../RUNNING-ON-AI-Framework.md` (parent directory — read this first for any non-trivial task)
+Full spec: `RUNNING-ON-AI-Framework.md` (repo root — read this first for any non-trivial task)
 
 ## Stack
 
@@ -47,14 +47,53 @@ npm run test:ci    # CI test run with coverage
 
 ## Phase status
 
-Currently implementing **Phase 0 — Foundation**:
-- [ ] Prisma + SQLite schema (all tables from spec §3)
-- [ ] Exercise library seed (free-exercise-db import)
-- [ ] Plyo/prehab/stretch starter JSON catalogs
-- [ ] ExerciseCard component
-- [ ] Exercise library browse page `/exercises`
+See `BUILD-STATE.md` in the project root for the authoritative, always-current
+state and the remaining-work list. Summary: **all six phases are built.**
 
-Phase 1 (Readiness + Intro Ramp) starts after Phase 0 ships.
+- **Phases 0–3:** foundation, readiness + intro ramp, strength tracker, run engine.
+- **Phase 4 — Plyo / prehab / stretch:** `plyoEngine.ts`, `prehabEngine.ts`,
+  `stretchEngine.ts`, the `niggle_log` tracker and `/niggle`.
+- **Phase 5 — Allocator + Session + editing:** `load.ts` (load currency + ACWR),
+  `allocator.ts`, `session.ts` (`applySessionPatch` + validator), the Today
+  screen, and eight session/niggle API routes. This is the product.
+- **Phase 6 — NL editing, learning, write-back:** `coach.ts` (NL → validated
+  patch), `preferences.ts` (§13 inference), `deload.ts`, `garminWorkout.ts`.
+
+Gates as of 2026-09-16: 1163 tests green, `tsc` clean, `next build` clean.
+
+## Rules that are load-bearing — do not quietly undo these
+
+1. **One edit funnel.** Coach and user both go through `validateSessionPatch` /
+   `applySessionPatch`. The coach's `actor` is hardcoded to `'coach'` and it
+   never sets `override`, so a model response cannot launder itself past
+   `edit_history`. Preview is the default; applying is opt-in (§11).
+2. **Re-validate on apply, never trust a preview.** A previewed patch is not a
+   token. The session may have moved underneath it.
+3. **Estimates are labelled and the label is load-bearing.** `resolveTarget`
+   refuses to issue a pace target from an `estimate` anchor. Never upgrade a
+   `source` without the observation that earns it.
+4. **Clearance is never invented.** Blank stays blank; the engines stay
+   conservative and say so on screen. A half-filled clearance form is rejected
+   rather than stored, because a `null` field reads as *unrestricted*.
+5. **No diagnosis language reaches the UI.** `containsDiagnosisLanguage` gates
+   engine output, model output, and authored catalog `rationale` copy.
+6. **Charts never appear on the Today screen** (§14). They live on `/trends`.
+7. **`npx prisma generate` after any schema change**, then `npx prisma db push`.
+
+## Key files added since the original dashboard
+
+- `src/types/session.ts` — the Session object (framework §3). Fixed shape; later
+  phases add item kinds, they do not restructure it.
+- `src/lib/strengthEngine.ts` — pure strength math and safety rails
+- `src/lib/keyLifts.ts` + `src/data/key-lifts.json` — the 20 curated,
+  auto-progressed runner lifts
+- `src/lib/strengthScenario.ts` — `STRENGTH_SCENARIO` presets
+- `scripts/seed-dev.ts` — 28 days of realistic local history
+- `src/lib/runEngine.ts` — run taxonomy, the return-to-run ladder, readiness veto
+- `src/lib/runAnalysis.ts` — easy-day audit, pace at matched HR, LTHR estimation
+- `src/lib/runScenario.ts` — `RUN_SCENARIO` presets
+- `scripts/garmin-backfill.ts` + `/api/garmin/check` — the go-live path
+- `GARMIN-SETUP.md` — Forerunner 965 setup, three commands
 
 ## Data sources
 

@@ -101,7 +101,10 @@ Datos de la semana:
 ${lines.join('\n')}`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Same override as coach.ts: ANTHROPIC_BASE_URL points at an
+    // Anthropic-compatible gateway; unset falls back to Anthropic itself.
+    const base = process.env.ANTHROPIC_BASE_URL?.replace(/\/+$/, '') ?? 'https://api.anthropic.com/v1';
+    const response = await fetch(`${base}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

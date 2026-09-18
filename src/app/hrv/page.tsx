@@ -13,16 +13,16 @@ import BenchmarkBadge from '@/components/ui/BenchmarkBadge';
 import BottomNav from '@/components/BottomNav';
 import { useLang } from '@/lib/i18n';
 
-const HRV_COLOR = '#c084fc';
+const HRV_COLOR = 'var(--chart-2)';
 
 // Relative-to-baseline zone for a single data point
 function zoneColor(hrv: number, median: number): string {
   if (median === 0) return HRV_COLOR;
   const ratio = hrv / median;
-  if (ratio >= 1.1)  return '#4ade80';
+  if (ratio >= 1.1)  return 'var(--ready)';
   if (ratio >= 0.9)  return HRV_COLOR;
-  if (ratio >= 0.75) return '#facc15';
-  return '#f87171';
+  if (ratio >= 0.75) return 'var(--caution)';
+  return 'var(--stop)';
 }
 
 // Day label every N points for 30/90d charts
@@ -41,9 +41,9 @@ export default function HRVPage() {
   const { profile, loaded: profileLoaded } = useProfile();
 
   const STATUS_META: Record<string, { label: string; color: string; desc: string }> = {
-    balanced:   { label: t('hrv.states.balanced'),    color: '#4ade80', desc: t('hrv.states.balancedDesc') },
-    unbalanced: { label: t('hrv.states.unbalanced'),  color: '#facc15', desc: t('hrv.states.unbalancedDesc') },
-    poor:       { label: t('hrv.states.low'),          color: '#f87171', desc: t('hrv.states.lowDesc') },
+    balanced:   { label: t('hrv.states.balanced'),    color: 'var(--ready)', desc: t('hrv.states.balancedDesc') },
+    unbalanced: { label: t('hrv.states.unbalanced'),  color: 'var(--caution)', desc: t('hrv.states.unbalancedDesc') },
+    poor:       { label: t('hrv.states.low'),          color: 'var(--stop)', desc: t('hrv.states.lowDesc') },
   };
 
   useEffect(() => {
@@ -67,19 +67,19 @@ export default function HRVPage() {
 
   if (!data || !profileLoaded) {
     return (
-      <div className="min-h-screen bg-bg">
-        <header className="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
+      <div className="min-h-screen bg-paper">
+        <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-rule">
           <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-            <Link href="/" className="p-1.5 rounded-lg hover:bg-surface text-secondary hover:text-primary transition-colors">
+            <Link href="/" className="p-1.5 hover:bg-wash text-pencil hover:text-ink transition-colors">
               <ArrowLeft size={18} />
             </Link>
             <Activity size={16} style={{ color: HRV_COLOR }} />
-            <h1 className="text-sm font-bold text-primary">{t('hrv.title')}</h1>
+            <h1 className="font-serif text-head text-ink">{t('hrv.title')}</h1>
           </div>
         </header>
         <main className="max-w-md mx-auto px-4 pb-28 pt-4 flex flex-col gap-4">
           {[72, 52, 200, 160].map((h, i) => (
-            <div key={i} className="animate-pulse bg-surface rounded-2xl" style={{ height: h }} />
+            <div key={i} className="animate-pulse bg-wash" style={{ height: h }} />
           ))}
         </main>
         <BottomNav />
@@ -113,14 +113,14 @@ export default function HRVPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-bg">
-      <header className="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
+    <div className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-rule">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="p-1.5 rounded-lg hover:bg-surface text-secondary hover:text-primary transition-colors">
+          <Link href="/" className="p-1.5 hover:bg-wash text-pencil hover:text-ink transition-colors">
             <ArrowLeft size={18} />
           </Link>
           <Activity size={16} style={{ color: HRV_COLOR }} />
-          <h1 className="text-sm font-bold text-primary">{t('hrv.title')}</h1>
+          <h1 className="font-serif text-head text-ink">{t('hrv.title')}</h1>
         </div>
       </header>
 
@@ -133,40 +133,40 @@ export default function HRVPage() {
               {hrv.lastNight}
             </span>
             <div className="mb-1">
-              <p className="text-sm text-secondary">ms rMSSD anoche</p>
+              <p className="text-sm text-pencil">ms rMSSD anoche</p>
               <p className="text-xs mt-0.5" style={{ color: statusMeta.color }}>
                 {statusMeta.label}
               </p>
             </div>
             <span
-              className="ml-auto mb-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-              style={{ color: statusMeta.color, backgroundColor: `${statusMeta.color}22` }}
+              className="ml-auto mb-1 font-serif text-note italic"
+              style={{ color: statusMeta.color }}
             >
               {statusMeta.label}
             </span>
           </div>
-          <p className="text-xs text-secondary mb-4">{statusMeta.desc}</p>
+          <p className="text-xs text-pencil mb-4">{statusMeta.desc}</p>
 
           {/* Baseline comparison row */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl bg-surface px-3 py-2.5 text-center">
-              <p className="text-xs text-muted mb-0.5">Anoche</p>
+            <div className="bg-wash px-3 py-2.5 text-center">
+              <p className="text-xs text-faint mb-0.5">Anoche</p>
               <p className="text-lg font-bold" style={{ color: HRV_COLOR }}>{hrv.lastNight}</p>
-              <p className="text-[10px] text-muted">ms</p>
+              <p className="text-[10px] text-faint">ms</p>
             </div>
-            <div className="rounded-xl bg-surface px-3 py-2.5 text-center">
-              <p className="text-xs text-muted mb-0.5">Media 7d</p>
-              <p className="text-lg font-bold text-primary">{avg7}</p>
-              <p className="text-[10px] text-muted">ms</p>
+            <div className="bg-wash px-3 py-2.5 text-center">
+              <p className="text-xs text-faint mb-0.5">Media 7d</p>
+              <p className="text-lg font-bold text-ink">{avg7}</p>
+              <p className="text-[10px] text-faint">ms</p>
             </div>
-            <div className="rounded-xl bg-surface px-3 py-2.5 text-center">
-              <p className="text-xs text-muted mb-0.5">vs baseline</p>
+            <div className="bg-wash px-3 py-2.5 text-center">
+              <p className="text-xs text-faint mb-0.5">vs baseline</p>
               <p className="text-lg font-bold" style={{
-                color: deviationPct >= 0 ? '#4ade80' : '#f87171',
+                color: deviationPct >= 0 ? 'var(--ready)' : 'var(--stop)',
               }}>
                 {deviationPct >= 0 ? '+' : ''}{deviationPct}%
               </p>
-              <p className="text-[10px] text-muted">hoy</p>
+              <p className="text-[10px] text-faint">hoy</p>
             </div>
           </div>
         </div>
@@ -176,27 +176,26 @@ export default function HRVPage() {
           <div className="card-header mb-4">
             <Activity size={14} style={{ color: HRV_COLOR }} />
             <span>{t('hrv.trend7d')}</span>
-            <span className="ml-auto text-xs text-muted">{t('hrv.avg7dLabel', { avg: avg7 })}</span>
+            <span className="ml-auto text-xs text-faint">{t('hrv.avg7dLabel', { avg: avg7 })}</span>
           </div>
 
           <div className="flex items-end justify-between gap-1.5 h-24 relative">
             {/* Reference line at 7d average */}
             <div
-              className="absolute left-0 right-0 border-t border-dashed border-border"
+              className="absolute left-0 right-0 border-t border-dashed border-rule"
               style={{ bottom: `${(avg7 / max7) * 100}%` }}
             />
             {hrv.trend.map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-[10px] font-medium" style={{ color: v > 0 ? zoneColor(v, avg7) : '#333' }}>
+                <span className="text-[10px] font-medium" style={{ color: v > 0 ? zoneColor(v, avg7) : 'var(--faint)' }}>
                   {v > 0 ? v : '—'}
                 </span>
                 <div
-                  className="w-full rounded-t-sm transition-all"
+                  className="w-full transition-all"
                   style={{
                     height: `${v > 0 ? (v / max7) * 100 : 0}%`,
-                    backgroundColor: v > 0 ? zoneColor(v, avg7) : '#1f1f1f',
+                    backgroundColor: v > 0 ? zoneColor(v, avg7) : 'var(--rule)',
                     minHeight: v > 0 ? 4 : 0,
-                    boxShadow: v > 0 ? `0 0 6px ${zoneColor(v, avg7)}55` : 'none',
                   }}
                 />
               </div>
@@ -204,12 +203,12 @@ export default function HRVPage() {
           </div>
           <div className="flex justify-between mt-2">
             {dates7.map((d, i) => (
-              <span key={i} className="flex-1 text-center text-xs text-muted capitalize">{d}</span>
+              <span key={i} className="flex-1 text-center text-xs text-faint capitalize">{d}</span>
             ))}
           </div>
 
           {/* Min/max */}
-          <div className="flex justify-between mt-3 text-xs text-secondary border-t border-border pt-3">
+          <div className="flex justify-between mt-3 text-xs text-pencil border-t border-rule pt-3">
             <span>{t('hrv.min7dLabel', { min: hrv7.length ? Math.min(...hrv7) : '—' })}</span>
             <span>{t('hrv.max7dLabel', { max: hrv7.length ? Math.max(...hrv7) : '—' })}</span>
             <span>{t('hrv.avg7dLabel', { avg: avg7 })}</span>
@@ -221,22 +220,22 @@ export default function HRVPage() {
           <div className="card-header mb-4">
             <Activity size={14} style={{ color: HRV_COLOR }} />
             <span>{t('hrv.trend30d')}</span>
-            {trendsLoading && <span className="ml-auto text-xs text-muted">{t('hrv.loading')}</span>}
+            {trendsLoading && <span className="ml-auto text-xs text-faint">{t('hrv.loading')}</span>}
             {!trendsLoading && trends && (
-              <span className="ml-auto text-xs text-muted">{t('hrv.median30d', { median: median30 })}</span>
+              <span className="ml-auto text-xs text-faint">{t('hrv.median30d', { median: median30 })}</span>
             )}
           </div>
 
           {!trendsLoading && !trends && (
             <div className="text-center py-6">
-              <p className="text-xs text-secondary">{t('hrv.noHistory')}</p>
-              <p className="text-[10px] text-muted mt-1">{t('hrv.noHistoryDesc')}</p>
+              <p className="text-xs text-pencil">{t('hrv.noHistory')}</p>
+              <p className="text-[10px] text-faint mt-1">{t('hrv.noHistoryDesc')}</p>
             </div>
           )}
 
           {trendsLoading && (
             <div className="h-24 flex items-center justify-center">
-              <div className="w-5 h-5 rounded-full border-2 border-border border-t-hrv animate-spin" />
+              <div className="w-5 h-5 border-2 border-rule border-t-hrv animate-spin" />
             </div>
           )}
 
@@ -245,16 +244,16 @@ export default function HRVPage() {
               <div className="flex items-end gap-px h-20 relative">
                 {/* Median reference line */}
                 <div
-                  className="absolute left-0 right-0 border-t border-dashed border-border/60"
+                  className="absolute left-0 right-0 border-t border-dashed border-rule"
                   style={{ bottom: `${(median30 / max30) * 100}%` }}
                 />
                 {hrv30.map((v, i) => (
                   <div
                     key={i}
-                    className="flex-1 rounded-t-sm"
+                    className="flex-1"
                     style={{
                       height: `${v > 0 ? Math.max(4, (v / max30) * 100) : 0}%`,
-                      backgroundColor: v > 0 ? zoneColor(v, median30) : '#1f1f1f',
+                      backgroundColor: v > 0 ? zoneColor(v, median30) : 'var(--rule)',
                       opacity: v > 0 ? 0.85 : 0.3,
                     }}
                   />
@@ -265,7 +264,7 @@ export default function HRVPage() {
                 {dateLabels30.map((label, i) => label ? (
                   <span
                     key={i}
-                    className="absolute text-[9px] text-muted -translate-x-1/2"
+                    className="absolute text-[9px] text-faint -translate-x-1/2"
                     style={{ left: `${(i / hrv30.length) * 100}%` }}
                   >
                     {label}
@@ -273,16 +272,16 @@ export default function HRVPage() {
                 ) : null)}
               </div>
               {/* Legend */}
-              <div className="flex gap-3 mt-4 pt-3 border-t border-border">
+              <div className="flex gap-3 mt-4 pt-3 border-t border-rule">
                 {[
-                  { color: '#4ade80', label: '>+10%' },
+                  { color: 'var(--ready)', label: '>+10%' },
                   { color: HRV_COLOR, label: 'Normal' },
-                  { color: '#facc15', label: '−10%' },
-                  { color: '#f87171', label: '<−25%' },
+                  { color: 'var(--caution)', label: '−10%' },
+                  { color: 'var(--stop)', label: '<−25%' },
                 ].map(z => (
                   <div key={z.label} className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />
-                    <span className="text-[10px] text-muted">{z.label}</span>
+                    <div className="w-2 h-2" style={{ backgroundColor: z.color }} />
+                    <span className="text-[10px] text-faint">{z.label}</span>
                   </div>
                 ))}
               </div>
@@ -304,24 +303,24 @@ export default function HRVPage() {
         {/* ── Relative zones (personal baseline) ───────────────────── */}
         <div className="card">
           <div className="card-header mb-3">
-            <Info size={14} className="text-secondary" />
+            <Info size={14} className="text-pencil" />
             <span>{t('hrv.zones.zoneTitle')}</span>
           </div>
           <div className="flex flex-col gap-2">
             {[
-              { label: t('hrv.zones.excellent'),    range: t('hrv.zones.excellentThreshold'), color: '#4ade80', desc: t('hrv.zones.excellentDesc') },
+              { label: t('hrv.zones.excellent'),    range: t('hrv.zones.excellentThreshold'), color: 'var(--ready)', desc: t('hrv.zones.excellentDesc') },
               { label: t('hrv.zones.normal'),       range: t('hrv.zones.normalThreshold'),    color: HRV_COLOR, desc: t('hrv.zones.normalDesc') },
-              { label: t('hrv.zones.slight'),       range: t('hrv.zones.slightThreshold'),    color: '#facc15', desc: t('hrv.zones.slightDesc') },
-              { label: t('hrv.zones.significant'),  range: t('hrv.zones.significantThreshold'), color: '#f87171', desc: t('hrv.zones.significantDesc') },
+              { label: t('hrv.zones.slight'),       range: t('hrv.zones.slightThreshold'),    color: 'var(--caution)', desc: t('hrv.zones.slightDesc') },
+              { label: t('hrv.zones.significant'),  range: t('hrv.zones.significantThreshold'), color: 'var(--stop)', desc: t('hrv.zones.significantDesc') },
             ].map(z => (
-              <div key={z.label} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
-                <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: z.color }} />
+              <div key={z.label} className="flex items-start gap-3 py-2 border-b border-rule last:border-0">
+                <div className="w-2 h-2 mt-1.5 flex-shrink-0" style={{ backgroundColor: z.color }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-primary">{z.label}</p>
-                    <p className="text-[10px] text-muted whitespace-nowrap">{z.range}</p>
+                    <p className="text-xs font-semibold text-ink">{z.label}</p>
+                    <p className="text-[10px] text-faint whitespace-nowrap">{z.range}</p>
                   </div>
-                  <p className="text-[11px] text-secondary mt-0.5">{z.desc}</p>
+                  <p className="text-[11px] text-pencil mt-0.5">{z.desc}</p>
                 </div>
               </div>
             ))}
@@ -331,26 +330,26 @@ export default function HRVPage() {
         {/* ── Educational section ───────────────────────────────────── */}
         <div className="card">
           <div className="card-header mb-3">
-            <Info size={14} className="text-secondary" />
+            <Info size={14} className="text-pencil" />
             <span>{t('hrv.info.title')}</span>
           </div>
 
-          <div className="flex flex-col gap-4 text-xs text-secondary">
+          <div className="flex flex-col gap-4 text-xs text-pencil">
 
             <div>
-              <p className="font-semibold text-primary mb-1">{t('hrv.info.whatTitle')}</p>
+              <p className="font-semibold text-ink mb-1">{t('hrv.info.whatTitle')}</p>
               <p>{t('hrv.info.whatDesc')}</p>
             </div>
 
             <div>
-              <p className="font-semibold text-primary mb-1">{t('hrv.info.whyTitle')}</p>
+              <p className="font-semibold text-ink mb-1">{t('hrv.info.whyTitle')}</p>
               <p>{t('hrv.info.whyDesc')}</p>
             </div>
 
             <div>
-              <p className="font-semibold text-primary mb-1">{t('hrv.info.howTitle')}</p>
+              <p className="font-semibold text-ink mb-1">{t('hrv.info.howTitle')}</p>
               <p className="mb-1">{t('hrv.info.howDesc')}</p>
-              <ul className="space-y-1 list-disc list-inside text-secondary">
+              <ul className="space-y-1 list-disc list-inside text-pencil">
                 <li>{t('hrv.info.tip1')}</li>
                 <li>{t('hrv.info.tip2')}</li>
                 <li>{t('hrv.info.tip3')}</li>
@@ -358,7 +357,7 @@ export default function HRVPage() {
             </div>
 
             <div>
-              <p className="font-semibold text-primary mb-1">{t('hrv.info.reducersTitle')}</p>
+              <p className="font-semibold text-ink mb-1">{t('hrv.info.reducersTitle')}</p>
               <div className="grid grid-cols-2 gap-1.5 mt-1">
                 {tArr('hrv.info.reducers').map((f: string) => (
                   <div key={f} className="flex items-center gap-1.5 text-[11px]">
@@ -370,7 +369,7 @@ export default function HRVPage() {
             </div>
 
             <div>
-              <p className="font-semibold text-primary mb-1">{t('hrv.info.improversTitle')}</p>
+              <p className="font-semibold text-ink mb-1">{t('hrv.info.improversTitle')}</p>
               <div className="grid grid-cols-2 gap-1.5 mt-1">
                 {tArr('hrv.info.improvers').map((f: string) => (
                   <div key={f} className="flex items-center gap-1.5 text-[11px]">
@@ -383,7 +382,7 @@ export default function HRVPage() {
 
           </div>
 
-          <p className="text-[10px] text-muted mt-4 pt-3 border-t border-border">
+          <p className="text-[10px] text-faint mt-4 pt-3 border-t border-rule">
             {t('hrv.info.ref')}
           </p>
         </div>

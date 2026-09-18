@@ -23,20 +23,20 @@ export default function SleepPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-bg">
-        <header className="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
+      <div className="min-h-screen bg-paper">
+        <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-rule">
           <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-            <Link href="/" className="p-1.5 rounded-lg hover:bg-surface text-secondary hover:text-primary transition-colors">
+            <Link href="/" className="p-1.5 hover:bg-wash text-pencil hover:text-ink transition-colors">
               <ArrowLeft size={18} />
             </Link>
             <Moon size={16} className="text-sleep" />
-            <h1 className="text-sm font-bold text-primary">{t('sleep.title')}</h1>
+            <h1 className="font-serif text-head text-ink">{t('sleep.title')}</h1>
           </div>
         </header>
         <main className="max-w-md mx-auto px-4 pb-28 pt-4 flex flex-col gap-4">
-          <div className="animate-pulse bg-surface rounded-2xl h-64" />
-          <div className="animate-pulse bg-surface rounded-2xl h-32" />
-          <div className="animate-pulse bg-surface rounded-2xl h-48" />
+          <div className="animate-pulse bg-wash h-64" />
+          <div className="animate-pulse bg-wash h-32" />
+          <div className="animate-pulse bg-wash h-48" />
         </main>
         <BottomNav />
       </div>
@@ -51,23 +51,23 @@ export default function SleepPage() {
     : 0;
 
   const barColor = (h: number) => {
-    if (h >= 7) return '#4ade80';
-    if (h >= 6) return '#facc15';
-    return '#f87171';
+    if (h >= 7) return 'var(--ready)';
+    if (h >= 6) return 'var(--caution)';
+    return 'var(--stop)';
   };
 
   const maxBarHours = Math.max(TARGET_HOURS + 1, ...sleepHours);
   const maxDebtAbs = Math.max(...sleepHours.filter(h => h > 0).map(h => Math.abs(TARGET_HOURS - h)), 0.5);
 
   return (
-    <div className="min-h-screen bg-bg">
-      <header className="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
+    <div className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-rule">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="p-1.5 rounded-lg hover:bg-surface text-secondary hover:text-primary transition-colors">
+          <Link href="/" className="p-1.5 hover:bg-wash text-pencil hover:text-ink transition-colors">
             <ArrowLeft size={18} />
           </Link>
           <Moon size={16} className="text-sleep" />
-          <h1 className="text-sm font-bold text-primary">{t('sleep.title')}</h1>
+          <h1 className="font-serif text-head text-ink">{t('sleep.title')}</h1>
         </div>
       </header>
 
@@ -79,36 +79,36 @@ export default function SleepPage() {
         <div className="grid grid-cols-3 gap-3">
           {/* Efficiency */}
           <div className="card text-center">
-            <p className="text-xs text-secondary mb-1">{t('sleep.efficiency')}</p>
-            <p className={`text-2xl font-bold ${efficiency >= 85 ? 'text-green-400' : efficiency >= 75 ? 'text-yellow-400' : 'text-red-400'}`}>
+            <p className="text-xs text-pencil mb-1">{t('sleep.efficiency')}</p>
+            <p className={`text-2xl font-bold ${efficiency >= 85 ? 'text-ready' : efficiency >= 75 ? 'text-caution' : 'text-stop'}`}>
               {efficiency}%
             </p>
-            <p className="text-xs text-muted mt-0.5">{t('sleep.inBed')}</p>
+            <p className="text-xs text-faint mt-0.5">{t('sleep.inBed')}</p>
           </div>
 
           {/* 7-day average */}
           <div className="card text-center">
-            <p className="text-xs text-secondary mb-1">{t('common.avg7d')}</p>
+            <p className="text-xs text-pencil mb-1">{t('common.avg7d')}</p>
             <p className="text-2xl font-bold text-sleep">
-              {avgHours.toFixed(1)}<span className="text-sm font-normal text-secondary ml-0.5">h</span>
+              {avgHours.toFixed(1)}<span className="text-sm font-normal text-pencil ml-0.5">h</span>
             </p>
-            <p className="text-xs text-muted mt-0.5">{t('sleep.perNight')}</p>
+            <p className="text-xs text-faint mt-0.5">{t('sleep.perNight')}</p>
           </div>
 
           {/* Sleep debt */}
           <div className="card text-center">
-            <p className="text-xs text-secondary mb-1">{t('sleep.debt')}</p>
+            <p className="text-xs text-pencil mb-1">{t('sleep.debt')}</p>
             <div className="flex items-center justify-center gap-1">
               {debt > 0.5
-                ? <TrendingDown size={14} className="text-red-400" />
+                ? <TrendingDown size={14} className="text-stop" />
                 : debt < -0.5
-                  ? <TrendingUp size={14} className="text-green-400" />
-                  : <Minus size={14} className="text-yellow-400" />}
-              <p className={`text-2xl font-bold ${debt > 0.5 ? 'text-red-400' : debt < -0.5 ? 'text-green-400' : 'text-yellow-400'}`}>
-                {Math.abs(debt).toFixed(1)}<span className="text-sm font-normal text-secondary ml-0.5">h</span>
+                  ? <TrendingUp size={14} className="text-ready" />
+                  : <Minus size={14} className="text-caution" />}
+              <p className={`text-2xl font-bold ${debt > 0.5 ? 'text-stop' : debt < -0.5 ? 'text-ready' : 'text-caution'}`}>
+                {Math.abs(debt).toFixed(1)}<span className="text-sm font-normal text-pencil ml-0.5">h</span>
               </p>
             </div>
-            <p className="text-xs text-muted mt-0.5">{debt > 0 ? t('sleep.deficit') : debt < 0 ? t('sleep.surplus') : t('sleep.balanced')}</p>
+            <p className="text-xs text-faint mt-0.5">{debt > 0 ? t('sleep.deficit') : debt < 0 ? t('sleep.surplus') : t('sleep.balanced')}</p>
           </div>
         </div>
 
@@ -117,14 +117,14 @@ export default function SleepPage() {
           <div className="card-header mb-4">
             <Moon size={14} className="text-sleep" />
             <span>{t('sleep.chartTitle')}</span>
-            <span className="ml-auto text-xs text-muted">{t('sleep.goalLine', { target: TARGET_HOURS })}</span>
+            <span className="ml-auto text-xs text-faint">{t('sleep.goalLine', { target: TARGET_HOURS })}</span>
           </div>
 
           {/* Bar chart */}
           <div className="flex items-end justify-between gap-1.5 h-28 relative">
             {/* 8h reference line */}
             <div
-              className="absolute left-0 right-0 border-t border-dashed border-border"
+              className="absolute left-0 right-0 border-t border-dashed border-rule"
               style={{ bottom: `${(TARGET_HOURS / maxBarHours) * 100}%` }}
             />
             {sleepHours.map((h, i) => (
@@ -132,9 +132,9 @@ export default function SleepPage() {
                 <span className="text-xs font-medium" style={{ color: barColor(h) }}>
                   {h > 0 ? `${h.toFixed(1)}` : '—'}
                 </span>
-                <div className="w-full rounded-t-sm" style={{
+                <div className="w-full" style={{
                   height: `${(h / maxBarHours) * 100}%`,
-                  backgroundColor: h > 0 ? barColor(h) : '#1f1f1f',
+                  backgroundColor: h > 0 ? barColor(h) : 'var(--rule)',
                   minHeight: h > 0 ? 4 : 0,
                 }} />
               </div>
@@ -144,7 +144,7 @@ export default function SleepPage() {
           {/* Day labels */}
           <div className="flex justify-between mt-2">
             {data.weeklyTrend.dates.map((d, i) => (
-              <span key={i} className="flex-1 text-center text-xs text-muted">{d}</span>
+              <span key={i} className="flex-1 text-center text-xs text-faint">{d}</span>
             ))}
           </div>
         </div>
@@ -152,14 +152,14 @@ export default function SleepPage() {
         {/* ── Sleep debt per day ────────────────────────────────── */}
         <div className="card">
           <div className="card-header mb-4">
-            <TrendingDown size={14} className="text-secondary" />
+            <TrendingDown size={14} className="text-pencil" />
             <span>{t('sleep.deficitPerNight')}</span>
-            <span className="ml-auto text-xs text-muted">{t('sleep.vsGoal', { target: TARGET_HOURS })}</span>
+            <span className="ml-auto text-xs text-faint">{t('sleep.vsGoal', { target: TARGET_HOURS })}</span>
           </div>
 
           <div className="flex items-center justify-between gap-1.5 h-24 relative">
             {/* Zero line */}
-            <div className="absolute left-0 right-0 border-t border-border" style={{ top: '50%' }} />
+            <div className="absolute left-0 right-0 border-t border-rule" style={{ top: '50%' }} />
 
             {sleepHours.map((h, i) => {
               const delta = h > 0 ? h - TARGET_HOURS : 0;
@@ -170,15 +170,15 @@ export default function SleepPage() {
                   {/* Surplus bar (above center) */}
                   <div className="flex-1 flex items-end justify-center">
                     {!isDeficit && delta !== 0 && (
-                      <div className="w-full rounded-t-sm bg-green-400/70" style={{ height: `${pct}%` }} />
+                      <div className="w-full bg-ready opacity-70" style={{ height: `${pct}%` }} />
                     )}
                   </div>
                   {/* Deficit bar (below center) */}
                   <div className="flex-1 flex items-start justify-center">
                     {isDeficit && (
-                      <div className="w-full rounded-b-sm" style={{
+                      <div className="w-full" style={{
                         height: `${pct}%`,
-                        backgroundColor: pct > 30 ? '#f87171' : '#facc15',
+                        backgroundColor: pct > 30 ? 'var(--stop)' : 'var(--caution)',
                       }} />
                     )}
                   </div>
@@ -193,9 +193,9 @@ export default function SleepPage() {
               const delta = h > 0 ? h - TARGET_HOURS : null;
               return (
                 <div key={i} className="flex-1 text-center">
-                  <span className="block text-xs text-muted">{data.weeklyTrend.dates[i]}</span>
+                  <span className="block text-xs text-faint">{data.weeklyTrend.dates[i]}</span>
                   {delta !== null && (
-                    <span className={`text-xs font-medium ${delta >= 0 ? 'text-green-400' : Math.abs(delta) > 1 ? 'text-red-400' : 'text-yellow-400'}`}>
+                    <span className={`text-xs font-medium ${delta >= 0 ? 'text-ready' : Math.abs(delta) > 1 ? 'text-stop' : 'text-caution'}`}>
                       {delta >= 0 ? '+' : ''}{delta.toFixed(1)}
                     </span>
                   )}
