@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, createElement } from 'react';
 import type { ReactNode } from 'react';
+import en from '@/locales/en';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type Locale = 'es' | 'en';
@@ -47,7 +48,7 @@ interface LangContextType {
 }
 
 const LangContext = createContext<LangContextType>({
-  locale: 'es',
+  locale: 'en',
   setLocale: () => {},
   t: (key) => key,
   tArr: () => [],
@@ -55,8 +56,14 @@ const LangContext = createContext<LangContextType>({
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('es');
-  const [messages, setMessages] = useState<Record<string, unknown>>({});
+  const [locale, setLocaleState] = useState<Locale>('en');
+  // Seeded statically rather than left empty. `messages` used to start as {}
+  // and fill in an effect, so the server render and the first paint showed raw
+  // keys — a visible flash of "nav.home" and "today.loading" on every cold
+  // load. A bundled default costs one locale's weight and removes it.
+  const [messages, setMessages] = useState<Record<string, unknown>>(
+    en as unknown as Record<string, unknown>,
+  );
 
   // Load locale file + apply saved preference
   useEffect(() => {

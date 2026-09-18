@@ -1,11 +1,17 @@
 'use client';
 
+// ── Gauge ─────────────────────────────────────────────────────────────────────
+// A drawn arc. The track is a hairline rule, the fill is ink (or whatever the
+// caller hands it), the caps are flat and there is no glow — a felt-tip dot
+// with a drop shadow is the single most dashboard-looking thing this app had.
+
 import { useEffect, useRef } from 'react';
 
 interface CircularGaugeProps {
   score: number;        // 0–100
   size?: number;        // svg viewBox size
   strokeWidth?: number;
+  /** A token string (`var(--ink)`, `var(--chart-1)`). Never a raw hex. */
   color: string;
   trackColor?: string;
   children?: React.ReactNode;
@@ -34,7 +40,7 @@ export default function CircularGauge({
   size = 200,
   strokeWidth = 12,
   color,
-  trackColor = '#1f1f1f',
+  trackColor = 'var(--rule)',
   children,
   animate = true,
 }: CircularGaugeProps) {
@@ -73,8 +79,8 @@ export default function CircularGauge({
         d={arcPath(cx, cy, r, START_DEG, endDeg)}
         fill="none"
         stroke={trackColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
+        strokeWidth={1.5}
+        strokeLinecap="butt"
       />
       {/* Fill */}
       <path
@@ -83,7 +89,7 @@ export default function CircularGauge({
         fill="none"
         stroke={color}
         strokeWidth={strokeWidth}
-        strokeLinecap="round"
+        strokeLinecap="butt"
         style={
           animate
             ? undefined
@@ -93,16 +99,6 @@ export default function CircularGauge({
               }
         }
       />
-      {/* Glow dot at tip */}
-      {clampedScore > 2 && (
-        <circle
-          cx={polar(cx, cy, r, fillDeg).x}
-          cy={polar(cx, cy, r, fillDeg).y}
-          r={strokeWidth / 2}
-          fill={color}
-          style={{ filter: `drop-shadow(0 0 6px ${color})` }}
-        />
-      )}
       {/* Center content */}
       {children && (
         <foreignObject x={cx - r * 0.7} y={cy - r * 0.7} width={r * 1.4} height={r * 1.4}>

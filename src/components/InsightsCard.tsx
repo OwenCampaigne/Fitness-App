@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Lightbulb, TrendingDown, TrendingUp, AlertTriangle,
+  TrendingDown, TrendingUp, AlertTriangle,
   CheckCircle, Info, Zap, Moon, Battery, Brain, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import type { DailyMetrics, UserProfile } from '@/lib/types';
 import type { ProfileBenchmarks } from '@/lib/benchmarks';
 import { format } from 'date-fns';
+import LogSection from './ui/LogSection';
+import { CAUTION, PENCIL, READY, RULE, STOP } from './ui/chartTheme';
 import { useInsightsHistory, analyzePatterns } from '@/lib/useInsightsHistory';
 import type { InsightHistoryEntry } from '@/lib/useInsightsHistory';
 import { useLang } from '@/lib/i18n';
@@ -25,18 +27,14 @@ interface Insight {
   type: InsightType;
 }
 
-const STYLES: Record<InsightType, { color: string; bg: string; border: string }> = {
-  success: { color: '#4ade80', bg: '#4ade8010', border: '#4ade8028' },
-  warning: { color: '#facc15', bg: '#facc1510', border: '#facc1528' },
-  danger:  { color: '#f87171', bg: '#f8717110', border: '#f8717128' },
-  info:    { color: '#818cf8', bg: '#818cf810', border: '#818cf828' },
-};
-
+// An insight *is* a verdict about the day, which is the one thing colour is
+// for here. It is spent on a 2px rule in the margin rather than a tinted
+// panel: four filled boxes down a page would be four things shouting.
 const DOT_COLOR: Record<InsightType, string> = {
-  success: '#4ade80',
-  warning: '#facc15',
-  danger:  '#f87171',
-  info:    '#818cf8',
+  success: READY,
+  warning: CAUTION,
+  danger:  STOP,
+  info:    PENCIL,
 };
 
 const SEVERITY: Record<InsightType, number> = { danger: 0, warning: 1, success: 2, info: 3 };
@@ -233,35 +231,33 @@ function HistoryTimeline({ entries, t }: { entries: InsightHistoryEntry[]; t: TF
   });
 
   return (
-    <div className="mt-3 pt-3 border-t border-border">
-      <p className="text-[10px] text-muted uppercase tracking-widest mb-2">{t('insights.recoveryHistory')}</p>
+    <div className="mt-3 pt-3 border-t border-rule">
+      <p className="block-label">{t('insights.recoveryHistory')}</p>
       <div className="flex gap-1 items-end">
         {slots.map(({ dateStr, entry, isToday, dayLabel }) => (
           <div key={dateStr} className="flex-1 flex flex-col items-center gap-1">
             <div
-              className="w-full rounded-full"
+              className="w-full"
               style={{
                 height: 8,
-                backgroundColor: entry
-                  ? DOT_COLOR[entry.worstType]
-                  : isToday ? '#333' : '#1f1f1f',
-                opacity: entry ? 1 : isToday ? 0.6 : 0.3,
+                backgroundColor: entry ? DOT_COLOR[entry.worstType] : RULE,
+                opacity: entry ? 1 : isToday ? 0.9 : 0.4,
               }}
               title={entry
                 ? `${dateStr}: ${t('insights.tooltipRecovery')} ${entry.recovery}%, ${t('insights.tooltipSleep')} ${entry.sleepHours.toFixed(1)}h`
                 : dateStr}
             />
             {isToday && (
-              <span className="text-[8px] text-muted leading-none">{dayLabel}</span>
+              <span className="text-note text-faint leading-none figures">{dayLabel}</span>
             )}
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-3 mt-2 flex-wrap">
+      <div className="flex items-center gap-4 mt-2 flex-wrap">
         {(['success', 'warning', 'danger'] as InsightType[]).map(type => (
-          <div key={type} className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: DOT_COLOR[type] }} />
-            <span className="text-[10px] text-muted">
+          <div key={type} className="flex items-center gap-1.5">
+            <div className="w-2 h-2" style={{ backgroundColor: DOT_COLOR[type] }} aria-hidden="true" />
+            <span className="font-serif text-note italic text-pencil">
               {type === 'success' ? t('insights.good') : type === 'warning' ? t('insights.moderate') : t('insights.low')}
             </span>
           </div>
@@ -305,61 +301,52 @@ export default function InsightsCard({ data, profile }: Props) {
   const hasHistory = entries.length >= 2;
 
   return (
-    <div className="card">
-      <div className="card-header mb-3">
-        <Lightbulb size={14} className="text-secondary" />
-        <span>{t('insights.title')}</span>
-        <span className="ml-auto text-[10px] text-muted">{t('insights.recommendations', { count: insights.length })}</span>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {insights.map(({ id, Icon, type, text, subtext }) => {
-          const s = STYLES[type];
-          return (
-            <div
-              key={id}
-              className="flex gap-3 rounded-xl px-3 py-2.5 border"
-              style={{ backgroundColor: s.bg, borderColor: s.border }}
-            >
-              <div className="mt-0.5 flex-shrink-0">
-                <Icon size={14} style={{ color: s.color }} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-primary leading-snug">{text}</p>
-                {subtext && (
-                  <p className="text-[11px] text-secondary mt-0.5 leading-snug">{subtext}</p>
-                )}
-              </div>
+    <LogSection
+      label={t('insights.title')}
+      figure={
+        <span className="font-serif text-note italic text-faint">
+          {t('insights.recommendations', { count: insights.length })}
+        </span>
+      }
+    >
+      <ul className="flex flex-col gap-2.5">
+        {insights.map(({ id, Icon, type, text, subtext }) => (
+          <li
+            key={id}
+            className="flex gap-2.5 pl-2.5 border-l-2"
+            style={{ borderColor: DOT_COLOR[type] }}
+          >
+            <Icon size={13} className="mt-1 shrink-0" style={{ color: DOT_COLOR[type] }} aria-hidden="true" />
+            <div className="min-w-0">
+              <p className="text-entry text-ink leading-snug">{text}</p>
+              {subtext && <p className="prose-log text-note text-pencil mt-0.5">{subtext}</p>}
             </div>
-          );
-        })}
-      </div>
+          </li>
+        ))}
+      </ul>
 
-      {/* Pattern summary */}
+      {/* Pattern summary — commentary, so it goes in the margin */}
       {patterns.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-border flex flex-col gap-1.5">
+        <div className="mt-3 pt-3 border-t border-rule flex flex-col gap-1.5">
           {patterns.map((p, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <Info size={11} className="text-muted mt-0.5 flex-shrink-0" />
-              <p className="text-[11px] text-secondary leading-snug">{p}</p>
-            </div>
+            <p key={i} className="marginalia">{p}</p>
           ))}
         </div>
       )}
 
-      {/* History toggle */}
       {hasHistory && (
         <button
           onClick={() => setShowHistory(v => !v)}
-          className="flex items-center gap-1 text-[11px] text-muted hover:text-primary transition-colors mt-3 pt-3 border-t border-border w-full"
+          aria-expanded={showHistory}
+          className="flex items-center gap-1 font-serif text-note italic text-pencil hover:text-ink transition-colors mt-3 pt-3 border-t border-rule w-full"
         >
           {showHistory ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
           {t('insights.recoveryHistory')}
-          <span className="ml-auto text-[10px]">{t('insights.days', { count: entries.length })}</span>
+          <span className="ml-auto text-faint">{t('insights.days', { count: entries.length })}</span>
         </button>
       )}
 
       {showHistory && <HistoryTimeline entries={entries} t={t} />}
-    </div>
+    </LogSection>
   );
 }

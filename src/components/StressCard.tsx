@@ -1,24 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import type { StressData } from '@/lib/types';
 import { ResponsiveContainer, AreaChart, Area, Tooltip, ReferenceLine, XAxis } from 'recharts';
+import LogSection from './ui/LogSection';
+import { AXIS, LINE_CURSOR, METRIC, RULE, TOOLTIP_CLASS } from './ui/chartTheme';
 import { useLang } from '@/lib/i18n';
 
 interface Props {
   stress: StressData;
 }
 
-function stressColor(avg: number) {
-  if (avg <= 25) return '#4ade80';
-  if (avg <= 50) return '#facc15';
-  return '#f87171';
-}
-
 export default function StressCard({ stress }: Props) {
   const { t } = useLang();
-  const color = stressColor(stress.average);
 
   function stressLabel(avg: number) {
     if (avg <= 25) return t('stress.levels.low');
@@ -27,48 +22,34 @@ export default function StressCard({ stress }: Props) {
   }
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <Brain size={14} className="text-stress" />
-        <span>{t('stress.title')}</span>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}22`, color }}>
+    <LogSection
+      label={t('stress.title')}
+      figure={
+        <span className="flex items-baseline gap-2">
+          <span className="font-serif text-note italic text-pencil">
             {stressLabel(stress.average)}
           </span>
-          <span className="text-2xl font-black leading-none" style={{ color }}>
+          <span className="measured text-head" style={{ color: METRIC.stress }}>
             {stress.average}
           </span>
-        </div>
-      </div>
-
-      {/* Timeline chart */}
+        </span>
+      }
+    >
+      {/* All-day timeline. The 25 and 50 lines are the only structure it needs. */}
       {stress.data.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-3">
           <ResponsiveContainer width="100%" height={80}>
             <AreaChart data={stress.data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
-              <defs>
-                <linearGradient id="stressGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-                  <stop offset="100%" stopColor={color} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="time"
-                tick={{ fontSize: 9, fill: '#737373' }}
-                tickLine={false}
-                axisLine={false}
-                interval={3}
-              />
-              <ReferenceLine y={25} stroke="#4ade80" strokeDasharray="3 3" strokeOpacity={0.3} />
-              <ReferenceLine y={50} stroke="#facc15" strokeDasharray="3 3" strokeOpacity={0.3} />
+              <XAxis dataKey="time" {...AXIS} axisLine={false} interval={3} />
+              <ReferenceLine y={25} stroke={RULE} strokeDasharray="3 3" />
+              <ReferenceLine y={50} stroke={RULE} strokeDasharray="3 3" />
               <Tooltip
+                cursor={LINE_CURSOR}
                 content={({ active, payload }) =>
                   active && payload?.length ? (
-                    <div className="rounded-md bg-surface border border-border px-2 py-1 text-xs">
-                      <span className="text-secondary mr-1">{payload[0].payload.time}</span>
-                      <span style={{ color: stressColor(Number(payload[0].value)) }}>
-                        {payload[0].value}
-                      </span>
+                    <div className={TOOLTIP_CLASS}>
+                      <span className="text-pencil mr-1.5">{payload[0].payload.time}</span>
+                      <span className="measured">{payload[0].value}</span>
                     </div>
                   ) : null
                 }
@@ -76,9 +57,10 @@ export default function StressCard({ stress }: Props) {
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke={color}
-                strokeWidth={2}
-                fill="url(#stressGrad)"
+                stroke={METRIC.stress}
+                strokeWidth={1.5}
+                fill={METRIC.stress}
+                fillOpacity={0.1}
                 dot={false}
               />
             </AreaChart>
@@ -86,46 +68,26 @@ export default function StressCard({ stress }: Props) {
         </div>
       )}
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatBox
-          label={t('stress.levels.atRest')}
-          value={`${stress.restingPercentage}%`}
-          color="#4ade80"
-        />
-        <StatBox
-          label={t('stress.levels.highStress')}
-          value={`${stress.highStressPercentage}%`}
-          color="#f87171"
-        />
-        <StatBox
-          label={t('stress.levels.avgLevel')}
-          value={String(stress.average)}
-          color={color}
-        />
-      </div>
+      <dl className="grid grid-cols-3 gap-4 border-t border-rule pt-2">
+        {([
+          [t('stress.levels.atRest'), `${stress.restingPercentage}%`],
+          [t('stress.levels.highStress'), `${stress.highStressPercentage}%`],
+          [t('stress.levels.avgLevel'), String(stress.average)],
+        ] as const).map(([label, value]) => (
+          <div key={label}>
+            <dt className="font-serif text-note italic text-faint leading-tight">{label}</dt>
+            <dd className="measured text-entry">{value}</dd>
+          </div>
+        ))}
+      </dl>
 
       <Link
         href="/stress"
-        className="flex items-center gap-1 text-xs text-muted hover:text-primary transition-colors mt-3 pt-3 border-t border-border"
+        className="flex items-center gap-1 font-serif text-note italic text-pencil hover:text-ink transition-colors mt-3 pt-3 border-t border-rule"
       >
-        <Brain size={11} />
         {t('stress.detailLink')}
         <ChevronRight size={11} className="ml-auto" />
       </Link>
-    </div>
-  );
-}
-
-function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div className="flex flex-col items-center bg-bg rounded-lg p-2">
-      <span className="text-[10px] text-secondary uppercase tracking-widest text-center leading-tight">
-        {label}
-      </span>
-      <span className="text-lg font-black mt-1" style={{ color }}>
-        {value}
-      </span>
-    </div>
+    </LogSection>
   );
 }

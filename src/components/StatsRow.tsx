@@ -1,6 +1,5 @@
 'use client';
 
-import { Footprints, Flame } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 
 interface Props {
@@ -12,25 +11,19 @@ export default function StatsRow({ steps, calories }: Props) {
   const { t, locale } = useLang();
   if (!steps && !calories) return null;
   return (
-    <div className="flex gap-3">
+    <dl className="flex gap-8 border-y border-rule py-2">
       {steps > 0 && (
-        <div className="card flex-1 flex items-center gap-3 py-3">
-          <Footprints size={18} className="text-battery flex-shrink-0" />
-          <div>
-            <p className="text-[10px] text-secondary uppercase tracking-widest">{t('statsRow.steps')}</p>
-            <p className="text-xl font-black text-primary">{steps.toLocaleString(locale)}</p>
-          </div>
+        <div>
+          <dt className="font-serif text-note italic text-faint">{t('statsRow.steps')}</dt>
+          <dd className="measured text-head">{steps.toLocaleString(locale)}</dd>
         </div>
       )}
       {calories > 0 && (
-        <div className="card flex-1 flex items-center gap-3 py-3">
-          <Flame size={18} className="text-strain flex-shrink-0" />
-          <div>
-            <p className="text-[10px] text-secondary uppercase tracking-widest">{t('statsRow.calories')}</p>
-            <p className="text-xl font-black text-primary">{calories.toLocaleString(locale)}</p>
-          </div>
+        <div>
+          <dt className="font-serif text-note italic text-faint">{t('statsRow.calories')}</dt>
+          <dd className="measured text-head">{calories.toLocaleString(locale)}</dd>
         </div>
       )}
-    </div>
+    </dl>
   );
 }

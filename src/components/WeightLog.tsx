@@ -254,7 +254,7 @@ export default function WeightLog({ profile }: Props) {
       {/* History */}
       {historyEntries.length > 0 && (
         <div className="mt-4 border-t border-border pt-3">
-          <p className="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">
+          <p className="font-serif text-note italic text-pencil mb-2">
             {t('weightLog.recentHistory')}
           </p>
           <div className="flex flex-col gap-1">

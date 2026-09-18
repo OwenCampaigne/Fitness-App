@@ -1,6 +1,14 @@
 'use client';
 
-import { Lightbulb, ExternalLink } from 'lucide-react';
+// ── A prehab row (framework §15) ─────────────────────────────────────────────
+// The one catalog whose authored `rationale` copy can name a condition, so it
+// leads with the structured fields instead — `targetTissue` and `muscleText`
+// say what the movement is for without saying what you have. The rationale is
+// only ever rendered here after the server has run it past
+// `containsDiagnosisLanguage`; anything flagged arrives as null.
+
+import { ExternalLink } from 'lucide-react';
+import { useLang } from '@/lib/i18n';
 import type { PrehabEntry } from '@/types/library';
 
 interface Props {
@@ -9,66 +17,41 @@ interface Props {
 }
 
 export default function PrehabCard({ prehab, className = '' }: Props) {
+  const { t } = useLang();
+  const meta = [prehab.bodyRegion, prehab.category].filter(Boolean).join(' · ');
+
   return (
-    <div className={`card ${className}`}>
-      {/* Header */}
-      <div className="flex items-start gap-2 flex-wrap mb-3">
-        <h3 className="text-sm font-semibold text-primary leading-tight flex-1 min-w-0">
-          {prehab.name}
-        </h3>
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 bg-hrv/20 text-hrv">
-          {prehab.bodyRegion}
-        </span>
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 bg-battery/20 text-battery">
-          {prehab.category}
-        </span>
-      </div>
+    <div className={`entry ${className}`}>
+      <h3 className="font-sans text-entry text-ink">{prehab.name}</h3>
+      <p className="font-serif text-note italic text-pencil">{meta}</p>
 
-      {/* Target tissue */}
       {prehab.targetTissue && (
-        <div className="mb-2">
-          <span className="text-[10px] text-muted uppercase tracking-widest">Target tissue: </span>
-          <span className="text-xs text-secondary">{prehab.targetTissue}</span>
-        </div>
+        <p className="mt-1 font-sans text-note text-pencil">
+          {t('library.targetTissue')}: <span className="text-ink">{prehab.targetTissue}</span>
+        </p>
       )}
 
-      {/* Muscle text */}
       {prehab.muscleText && (
-        <p className="text-xs text-secondary mb-2">{prehab.muscleText}</p>
+        <p className="mt-1 font-sans text-note text-pencil">{prehab.muscleText}</p>
       )}
 
-      {/* Niggle tags */}
       {prehab.niggleTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {prehab.niggleTags.map(tag => (
-            <span
-              key={tag}
-              className="text-[10px] px-2 py-0.5 rounded-full bg-muted/30 text-secondary"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        <p className="mt-1 font-serif text-note italic text-pencil">
+          {prehab.niggleTags.join(' · ')}
+        </p>
       )}
 
-      {/* Rationale chip */}
-      {prehab.rationale && (
-        <div className="mb-3 flex items-start gap-1.5 bg-muted/20 rounded-lg px-3 py-2">
-          <Lightbulb size={12} className="text-stress flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-secondary leading-relaxed">{prehab.rationale}</p>
-        </div>
-      )}
+      {prehab.rationale && <p className="marginalia mt-1.5">{prehab.rationale}</p>}
 
-      {/* Video link */}
       {prehab.videoUrl && (
         <a
           href={prehab.videoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs text-battery hover:text-battery/80 transition-colors"
+          className="mt-1.5 inline-flex items-center gap-1.5 font-sans text-note text-ink underline underline-offset-2"
         >
           <ExternalLink size={12} />
-          Watch video
+          {t('library.video')}
         </a>
       )}
     </div>

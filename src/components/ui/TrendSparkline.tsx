@@ -1,11 +1,18 @@
 'use client';
 
+// ── Sparkline ─────────────────────────────────────────────────────────────────
+// A line in the margin, not a chart. No axes, no grid, no gradient wash — a
+// thin stroke, a flat tint under it so the shape reads at 44px tall, and a
+// broken rule where the median sits.
+
 import { ResponsiveContainer, AreaChart, Area, Tooltip, ReferenceLine } from 'recharts';
+import { FAINT, INK, LINE_CURSOR, RULE, TOOLTIP_CLASS } from './chartTheme';
 
 interface TrendSparklineProps {
   data: number[];
   labels?: string[];
-  color: string;
+  /** A `--chart-*` token, or ink. Never a raw hex: dark mode has to follow. */
+  color?: string;
   height?: number;
   showDots?: boolean;
   referenceValue?: number;
@@ -15,7 +22,7 @@ interface TrendSparklineProps {
 export default function TrendSparkline({
   data,
   labels = [],
-  color,
+  color = INK,
   height = 56,
   referenceValue,
   referenceLabel,
@@ -25,35 +32,32 @@ export default function TrendSparkline({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
-        <defs>
-          <linearGradient id={`grad-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="100%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
         {referenceValue !== undefined && (
           <ReferenceLine
             y={referenceValue}
-            stroke={color}
+            stroke={RULE}
             strokeDasharray="3 3"
-            strokeOpacity={0.5}
-            label={referenceLabel ? {
-              value: referenceLabel,
-              position: 'insideTopRight',
-              fill: color,
-              fontSize: 9,
-              opacity: 0.7,
-            } : undefined}
+            label={
+              referenceLabel
+                ? {
+                    value: referenceLabel,
+                    position: 'insideTopRight',
+                    fill: FAINT,
+                    fontSize: 9,
+                  }
+                : undefined
+            }
           />
         )}
         <Tooltip
+          cursor={LINE_CURSOR}
           content={({ active, payload }) =>
             active && payload?.length ? (
-              <div className="rounded-md bg-surface border border-border px-2 py-1 text-xs text-primary">
+              <div className={TOOLTIP_CLASS}>
                 {payload[0].payload.label && (
-                  <span className="text-secondary mr-1">{payload[0].payload.label}</span>
+                  <span className="text-pencil mr-1.5">{payload[0].payload.label}</span>
                 )}
-                <span style={{ color }}>{payload[0].value}</span>
+                <span className="measured">{payload[0].value}</span>
               </div>
             ) : null
           }
@@ -62,8 +66,9 @@ export default function TrendSparkline({
           type="monotone"
           dataKey="v"
           stroke={color}
-          strokeWidth={2}
-          fill={`url(#grad-${color.replace('#', '')})`}
+          strokeWidth={1.5}
+          fill={color}
+          fillOpacity={0.1}
           dot={false}
           isAnimationActive
         />

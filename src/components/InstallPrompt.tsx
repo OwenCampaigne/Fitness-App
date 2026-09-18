@@ -66,7 +66,7 @@ export default function InstallPrompt() {
       <style>{`@keyframes slideUp { from { transform: translateY(20px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }`}</style>
 
       <div
-        className="rounded-2xl border border-border p-4 shadow-2xl"
+        className="rounded border border-rule p-4 bg-paper"
         style={{ background: '#111111' }}
       >
         <div className="flex items-start gap-3">

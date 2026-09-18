@@ -1,7 +1,15 @@
 'use client'
 
+// ── /exercises — the library ─────────────────────────────────────────────────
+// Four catalogs, 873 movements between them. This is the one screen in the app
+// where browsing speed beats the ruled-entry-per-thing rhythm, so: a fixed
+// header carrying the tabs, the search line and the filters, and beneath it a
+// plain dense list. Everything above the list stays put while the list scrolls,
+// because the whole job here is narrowing.
+
 import { useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
+import { useLang } from '@/lib/i18n'
 import type { ExerciseEntry, PlyoEntry, PrehabEntry, StretchEntry } from '@/types/library'
 import { ExerciseCard, PlyoCard, PrehabCard, StretchCard } from '@/components/library'
 import BottomNav from '@/components/BottomNav'
@@ -17,7 +25,7 @@ interface Props {
   stretches: StretchEntry[]
 }
 
-// ── Chip button ───────────────────────────────────────────────────────────────
+// ── Filter chip ───────────────────────────────────────────────────────────────
 function Chip({
   label,
   active,
@@ -29,16 +37,27 @@ function Chip({
 }) {
   return (
     <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={[
-        'px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
+        'whitespace-nowrap rounded-sm border px-2 py-0.5 font-sans text-note capitalize transition-colors',
         active
-          ? 'bg-primary text-bg'
-          : 'bg-surface text-secondary border border-border hover:text-primary',
+          ? 'border-ink bg-ink font-semibold text-paper'
+          : 'border-rule text-pencil hover:text-ink',
       ].join(' ')}
     >
       {label}
     </button>
+  )
+}
+
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="font-serif text-note italic text-pencil">{label}</span>
+      {children}
+    </div>
   )
 }
 
@@ -53,6 +72,7 @@ function uniq(values: string[]): string[] {
 }
 
 export default function ExercisesClient({ exercises, plyos, prehab, stretches }: Props) {
+  const { t } = useLang()
   const [tab, setTab] = useState<Tab>('exercises')
   const [search, setSearch] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -138,16 +158,15 @@ export default function ExercisesClient({ exercises, plyos, prehab, stretches }:
   const visibleList = activeList.slice(0, visibleCount)
   const hasMore = visibleCount < totalCount
 
-  // ── Tab labels ─────────────────────────────────────────────────────────────
   const TABS: { key: Tab; label: string }[] = [
-    { key: 'exercises', label: 'Exercises' },
-    { key: 'plyos', label: 'Plyos' },
-    { key: 'prehab', label: 'Prehab' },
-    { key: 'stretches', label: 'Stretches' },
+    { key: 'exercises', label: t('library.tabs.exercises') },
+    { key: 'plyos', label: t('library.tabs.plyos') },
+    { key: 'prehab', label: t('library.tabs.prehab') },
+    { key: 'stretches', label: t('library.tabs.stretches') },
   ]
 
-  const handleTabChange = (t: Tab) => {
-    setTab(t)
+  const handleTabChange = (next: Tab) => {
+    setTab(next)
     setSearch('')
     setVisibleCount(PAGE_SIZE)
   }
@@ -157,216 +176,221 @@ export default function ExercisesClient({ exercises, plyos, prehab, stretches }:
     resetPaging()
   }
 
-  // ── Count label ────────────────────────────────────────────────────────────
-  const countLabel = (() => {
-    const noun =
-      tab === 'exercises' ? 'exercise' :
-      tab === 'plyos' ? 'plyo' :
-      tab === 'prehab' ? 'prehab exercise' :
-      'stretch'
-    return `${totalCount} ${noun}${totalCount !== 1 ? 's' : ''}`
-  })()
+  const clearFilters = () => {
+    setSearch('')
+    setExLevel(null)
+    setExEquip(null)
+    setPlyoTier(null)
+    setPrehabRegion(null)
+    setStretchType(null)
+    setStretchWhen(null)
+    resetPaging()
+  }
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <h1 className="text-sm font-bold text-primary">Library</h1>
-        </div>
+    <div className="min-h-screen bg-paper">
+      {/* ── Header: everything that narrows the list ────────────────────────── */}
+      <header className="sticky top-0 z-40 border-b border-rule bg-paper/95 backdrop-blur">
+        <div className="mx-auto max-w-md px-4 pb-2 pt-3">
+          <h1 className="font-serif text-head text-ink">{t('nav.exercises')}</h1>
 
-        {/* Tabs */}
-        <div className="max-w-md mx-auto px-4 pb-2">
-          <div className="flex gap-1">
+          <div className="mt-2 flex gap-4 border-b border-rule">
             {TABS.map(({ key, label }) => (
               <button
                 key={key}
+                type="button"
+                aria-pressed={tab === key}
                 onClick={() => handleTabChange(key)}
                 className={[
-                  'flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors',
+                  '-mb-px border-b-2 pb-1.5 font-sans text-entry transition-colors',
                   tab === key
-                    ? 'bg-primary text-bg'
-                    : 'text-secondary hover:text-primary hover:bg-surface',
+                    ? 'border-ink font-semibold text-ink'
+                    : 'border-transparent text-pencil hover:text-ink',
                 ].join(' ')}
               >
                 {label}
               </button>
             ))}
           </div>
+
+          {/* ── Search ── */}
+          <div className="relative mt-2">
+            <label htmlFor="library-search" className="sr-only">
+              {t('library.search')}
+            </label>
+            <Search
+              size={14}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-pencil"
+            />
+            <input
+              id="library-search"
+              type="search"
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder={t('library.search')}
+              className="w-full rounded-none border-0 border-b border-rule bg-transparent py-2 pl-6 pr-7 font-sans text-entry text-ink placeholder:text-faint focus:border-ink"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange('')}
+                aria-label={t('library.clearSearch')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-pencil transition-colors hover:text-ink"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* ── Filters ── */}
+          <div className="mt-2 flex flex-col gap-1.5">
+            {tab === 'exercises' && (
+              <>
+                <FilterRow label={t('library.filters.level')}>
+                  {exLevels.map((lvl) => (
+                    <Chip
+                      key={lvl}
+                      label={lvl}
+                      active={exLevel === lvl}
+                      onClick={() => {
+                        setExLevel(exLevel === lvl ? null : lvl)
+                        resetPaging()
+                      }}
+                    />
+                  ))}
+                </FilterRow>
+                <FilterRow label={t('library.filters.equipment')}>
+                  {exEquips.map((eq) => (
+                    <Chip
+                      key={eq}
+                      label={eq}
+                      active={exEquip === eq}
+                      onClick={() => {
+                        setExEquip(exEquip === eq ? null : eq)
+                        resetPaging()
+                      }}
+                    />
+                  ))}
+                </FilterRow>
+              </>
+            )}
+
+            {tab === 'plyos' && (
+              <FilterRow label={t('library.filters.tier')}>
+                {[1, 2, 3].map((tier) => (
+                  <Chip
+                    key={tier}
+                    label={t('library.tier', { n: tier })}
+                    active={plyoTier === tier}
+                    onClick={() => {
+                      setPlyoTier(plyoTier === tier ? null : tier)
+                      resetPaging()
+                    }}
+                  />
+                ))}
+              </FilterRow>
+            )}
+
+            {tab === 'prehab' && (
+              <FilterRow label={t('library.filters.region')}>
+                {prehabRegions.map((region) => (
+                  <Chip
+                    key={region}
+                    label={region}
+                    active={prehabRegion === region}
+                    onClick={() => {
+                      setPrehabRegion(prehabRegion === region ? null : region)
+                      resetPaging()
+                    }}
+                  />
+                ))}
+              </FilterRow>
+            )}
+
+            {tab === 'stretches' && (
+              <>
+                <FilterRow label={t('library.filters.type')}>
+                  {stretchTypes.map((type) => (
+                    <Chip
+                      key={type}
+                      label={type}
+                      active={stretchType === type}
+                      onClick={() => {
+                        setStretchType(stretchType === type ? null : type)
+                        resetPaging()
+                      }}
+                    />
+                  ))}
+                </FilterRow>
+                <FilterRow label={t('library.filters.when')}>
+                  {stretchWhens.map((when) => (
+                    <Chip
+                      key={when}
+                      label={when}
+                      active={stretchWhen === when}
+                      onClick={() => {
+                        setStretchWhen(stretchWhen === when ? null : when)
+                        resetPaging()
+                      }}
+                    />
+                  ))}
+                </FilterRow>
+              </>
+            )}
+          </div>
+
+          <p aria-live="polite" className="figures py-1.5 font-serif text-note italic text-pencil">
+            {t('library.showing', { count: totalCount })}
+          </p>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 pb-28 pt-4 flex flex-col gap-3">
-        {/* ── Search bar ──────────────────────────────────────────────────── */}
-        <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder={`Search ${tab}…`}
-            className="w-full bg-surface border border-border rounded-xl pl-9 pr-9 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:border-primary/50 transition-colors"
-          />
-          {search && (
+      <main className="mx-auto max-w-md px-4 pb-28">
+        {totalCount === 0 && (
+          <div className="py-10">
+            <p className="font-sans text-entry text-ink">{t('library.none.title')}</p>
+            <p className="prose-log mt-1 text-entry">{t('library.none.body')}</p>
             <button
-              onClick={() => handleSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-secondary transition-colors"
+              type="button"
+              onClick={clearFilters}
+              className="mt-3 rounded-sm border border-rule px-3 py-1.5 font-sans text-note text-ink transition-colors hover:border-ink"
             >
-              <X size={14} />
+              {t('library.none.clear')}
             </button>
-          )}
-        </div>
-
-        {/* ── Filter chips (tab-specific) ──────────────────────────────────── */}
-        {tab === 'exercises' && (
-          <div className="flex flex-col gap-2">
-            {/* Level chips */}
-            <div className="flex gap-1.5 flex-wrap">
-              <span className="text-[10px] text-muted uppercase tracking-wider self-center mr-1">Level</span>
-              {exLevels.map((lvl) => (
-                <Chip
-                  key={lvl}
-                  label={lvl}
-                  active={exLevel === lvl}
-                  onClick={() => {
-                    setExLevel(exLevel === lvl ? null : lvl)
-                    resetPaging()
-                  }}
-                />
-              ))}
-            </div>
-            {/* Equipment chips */}
-            <div className="flex gap-1.5 flex-wrap">
-              <span className="text-[10px] text-muted uppercase tracking-wider self-center mr-1">Equip</span>
-              {exEquips.map((eq) => (
-                <Chip
-                  key={eq}
-                  label={eq}
-                  active={exEquip === eq}
-                  onClick={() => {
-                    setExEquip(exEquip === eq ? null : eq)
-                    resetPaging()
-                  }}
-                />
-              ))}
-            </div>
           </div>
         )}
 
-        {tab === 'plyos' && (
-          <div className="flex gap-1.5 flex-wrap">
-            <span className="text-[10px] text-muted uppercase tracking-wider self-center mr-1">Tier</span>
-            {[1, 2, 3].map((tier) => (
-              <Chip
-                key={tier}
-                label={`Tier ${tier}`}
-                active={plyoTier === tier}
-                onClick={() => {
-                  setPlyoTier(plyoTier === tier ? null : tier)
-                  resetPaging()
-                }}
-              />
-            ))}
-          </div>
-        )}
+        {tab === 'exercises' &&
+          (visibleList as ExerciseEntry[]).map((ex) => (
+            <ExerciseCard key={ex.id} exercise={ex} />
+          ))}
 
-        {tab === 'prehab' && (
-          <div className="flex gap-1.5 flex-wrap">
-            <span className="text-[10px] text-muted uppercase tracking-wider self-center mr-1">Region</span>
-            {prehabRegions.map((region) => (
-              <Chip
-                key={region}
-                label={region}
-                active={prehabRegion === region}
-                onClick={() => {
-                  setPrehabRegion(prehabRegion === region ? null : region)
-                  resetPaging()
-                }}
-              />
-            ))}
-          </div>
-        )}
+        {tab === 'plyos' &&
+          (visibleList as PlyoEntry[]).map((pl) => <PlyoCard key={pl.id} plyo={pl} />)}
 
-        {tab === 'stretches' && (
-          <div className="flex flex-col gap-2">
-            {/* Type chips */}
-            <div className="flex gap-1.5 flex-wrap">
-              <span className="text-[10px] text-muted uppercase tracking-wider self-center mr-1">Type</span>
-              {stretchTypes.map((type) => (
-                <Chip
-                  key={type}
-                  label={type}
-                  active={stretchType === type}
-                  onClick={() => {
-                    setStretchType(stretchType === type ? null : type)
-                    resetPaging()
-                  }}
-                />
-              ))}
-            </div>
-            {/* When to use chips */}
-            <div className="flex gap-1.5 flex-wrap">
-              <span className="text-[10px] text-muted uppercase tracking-wider self-center mr-1">When</span>
-              {stretchWhens.map((when) => (
-                <Chip
-                  key={when}
-                  label={when}
-                  active={stretchWhen === when}
-                  onClick={() => {
-                    setStretchWhen(stretchWhen === when ? null : when)
-                    resetPaging()
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        {tab === 'prehab' &&
+          (visibleList as PrehabEntry[]).map((pr) => <PrehabCard key={pr.id} prehab={pr} />)}
 
-        {/* ── Count ───────────────────────────────────────────────────────── */}
-        <p className="text-xs text-muted">{countLabel}</p>
+        {tab === 'stretches' &&
+          (visibleList as StretchEntry[]).map((st) => <StretchCard key={st.id} stretch={st} />)}
 
-        {/* ── Card grid ───────────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-3">
-          {totalCount === 0 && (
-            <div className="card text-center py-8">
-              <p className="text-sm text-secondary">No results found</p>
-              <p className="text-xs text-muted mt-1">Try adjusting your search or filters</p>
-            </div>
-          )}
-
-          {tab === 'exercises' &&
-            (visibleList as ExerciseEntry[]).map((ex) => (
-              <ExerciseCard key={ex.id} exercise={ex} />
-            ))}
-
-          {tab === 'plyos' &&
-            (visibleList as PlyoEntry[]).map((pl) => (
-              <PlyoCard key={pl.id} plyo={pl} />
-            ))}
-
-          {tab === 'prehab' &&
-            (visibleList as PrehabEntry[]).map((pr) => (
-              <PrehabCard key={pr.id} prehab={pr} />
-            ))}
-
-          {tab === 'stretches' &&
-            (visibleList as StretchEntry[]).map((st) => (
-              <StretchCard key={st.id} stretch={st} />
-            ))}
-        </div>
-
-        {/* ── Load more ───────────────────────────────────────────────────── */}
         {hasMore && (
           <button
+            type="button"
             onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-            className="w-full py-3 rounded-xl border border-border text-sm text-secondary hover:text-primary hover:border-primary/50 transition-colors"
+            className="mt-4 w-full rounded-sm border border-rule py-2.5 font-sans text-entry text-ink transition-colors hover:border-ink"
           >
-            Load {Math.min(PAGE_SIZE, totalCount - visibleCount)} more
-            <span className="text-xs text-muted ml-1">
-              ({visibleCount}/{totalCount})
+            {t('library.loadMore', { count: Math.min(PAGE_SIZE, totalCount - visibleCount) })}
+            <span className="figures ml-1.5 font-serif text-note italic text-pencil">
+              {t('library.shownOf', { shown: visibleCount, total: totalCount })}
             </span>
           </button>
         )}
+
+        {/* Framework §15 — the prehab catalog is medical-adjacent, so the
+            disclaimer renders wherever it is on screen. */}
+        {tab === 'prehab' && <p className="marginalia mt-6">{t('library.disclaimer')}</p>}
       </main>
 
       <BottomNav />

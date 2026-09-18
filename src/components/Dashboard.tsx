@@ -27,7 +27,7 @@ import PushNotificationManager from './PushNotificationManager';
 
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-surface rounded-2xl ${className ?? ''}`} />
+    <div className={`animate-pulse bg-surface rounded ${className ?? ''}`} />
   );
 }
 

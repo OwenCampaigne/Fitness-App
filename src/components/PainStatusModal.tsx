@@ -1,14 +1,16 @@
 'use client'
+
+// ── Updating the knee flag ────────────────────────────────────────────────────
+// Three ruled rows on a sheet of paper. The option you are on is marked in ink;
+// the two you are not are pencil. No card, no pill, no tint.
+
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { useLang } from '@/lib/i18n'
 
 type PainLevel = 'none' | 'sometimes' | 'yes'
 
-const OPTIONS: { value: PainLevel; label: string; desc: string }[] = [
-  { value: 'none', label: 'None', desc: 'No knee pain or swelling' },
-  { value: 'sometimes', label: 'Sometimes', desc: 'Mild pain that clears during activity' },
-  { value: 'yes', label: 'Yes', desc: 'Active pain or swelling — rest day' },
-]
+const OPTIONS: PainLevel[] = ['none', 'sometimes', 'yes']
 
 interface Props {
   current: PainLevel
@@ -17,6 +19,7 @@ interface Props {
 }
 
 export default function PainStatusModal({ current, onClose, onSaved }: Props) {
+  const { t } = useLang()
   const [selected, setSelected] = useState<PainLevel>(current)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -30,10 +33,10 @@ export default function PainStatusModal({ current, onClose, onSaved }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPainLevel: selected }),
       })
-      if (!res.ok) throw new Error(`Save failed (${res.status})`)
+      if (!res.ok) throw new Error(t('readiness.painModal.error'))
       onSaved()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
+      setError(err instanceof Error ? err.message : t('readiness.painModal.error'))
     } finally {
       setSaving(false)
     }
@@ -45,50 +48,62 @@ export default function PainStatusModal({ current, onClose, onSaved }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-bg rounded-t-2xl p-6 flex flex-col gap-4"
-        onClick={e => e.stopPropagation()}
+        className="w-full max-w-md bg-paper border-t border-ink p-4 safe-pb"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-primary">Update knee status</h2>
-          <button onClick={onClose} className="p-1 rounded-lg text-muted hover:text-primary">
-            <X size={18} />
+        <div className="flex items-start justify-between gap-2">
+          <h2 className="font-serif text-head text-ink">{t('readiness.painModal.title')}</h2>
+          <button
+            type="button"
+            aria-label={t('readiness.painModal.close')}
+            onClick={onClose}
+            className="p-1 text-pencil hover:text-ink transition-colors"
+          >
+            <X size={16} />
           </button>
         </div>
 
-        <div className="flex flex-col gap-2">
-          {OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setSelected(opt.value)}
-              className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
-                selected === opt.value
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-surface'
-              }`}
-            >
-              <div
-                className={`w-3 h-3 mt-0.5 rounded-full border-2 shrink-0 transition-all ${
-                  selected === opt.value ? 'border-primary bg-primary' : 'border-border'
-                }`}
-              />
-              <div>
-                <p className="text-sm font-semibold text-primary">{opt.label}</p>
-                <p className="text-xs text-secondary">{opt.desc}</p>
-              </div>
-            </button>
-          ))}
+        <div className="mt-3 border-t border-rule" role="radiogroup">
+          {OPTIONS.map((opt) => {
+            const on = selected === opt
+            return (
+              <button
+                key={opt}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => setSelected(opt)}
+                className="entry w-full flex items-baseline gap-3 text-left"
+              >
+                <span
+                  className={`w-2.5 h-2.5 shrink-0 translate-y-0.5 border ${
+                    on ? 'border-ink bg-ink' : 'border-rule'
+                  }`}
+                />
+                <span className="min-w-0">
+                  <span
+                    className={`block text-entry ${on ? 'text-ink font-medium' : 'text-pencil'}`}
+                  >
+                    {t(`readiness.painModal.options.${opt}.label`)}
+                  </span>
+                  <span className="block font-serif italic text-note text-pencil mt-0.5">
+                    {t(`readiness.painModal.options.${opt}.desc`)}
+                  </span>
+                </span>
+              </button>
+            )
+          })}
         </div>
 
-        {error && <p className="text-xs text-recovery-red">{error}</p>}
+        {error && <p className="mt-2 text-note text-stop">{error}</p>}
 
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-3 rounded-xl bg-primary text-bg font-bold text-sm disabled:opacity-40"
+          className="mt-4 w-full border border-ink text-ink text-entry font-medium py-2.5 rounded-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors"
         >
-          {saving ? 'Saving...' : 'Update'}
+          {saving ? t('readiness.painModal.saving') : t('readiness.painModal.save')}
         </button>
       </div>
     </div>

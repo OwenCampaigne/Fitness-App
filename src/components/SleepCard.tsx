@@ -1,10 +1,17 @@
 'use client';
 
-import { Moon, Zap } from 'lucide-react';
+// ── Sleep ─────────────────────────────────────────────────────────────────────
+// Stages are four categories, so they take four series tokens and a legend
+// that names each one — the swatch is a convenience, the word is the label.
+// The duration rule is the only thing here that can be a verdict, and only
+// because "under six hours" is one.
+
 import type { SleepData } from '@/lib/types';
 import type { MetricBenchmark } from '@/lib/benchmarks';
 import { formatDuration } from '@/lib/scoring';
 import BenchmarkBadge from './ui/BenchmarkBadge';
+import LogSection from './ui/LogSection';
+import { CAUTION, SERIES, STOP } from './ui/chartTheme';
 import { useLang } from '@/lib/i18n';
 
 interface Props {
@@ -18,57 +25,62 @@ interface Props {
 export default function SleepCard({ sleep, benchmark, isDemo }: Props) {
   const { t, locale } = useLang();
   const totalHours = sleep.totalSleepSeconds / 3600;
+  const timeFmt = (iso: string) =>
+    new Date(iso).toLocaleTimeString(locale === 'es' ? 'es-ES' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   const STAGES = [
-    { key: 'deepSleepSeconds' as const, label: t('sleep.deep'), color: '#818cf8', target: 0.2 },
-    { key: 'remSleepSeconds' as const, label: t('sleep.rem'), color: '#c084fc', target: 0.25 },
-    { key: 'lightSleepSeconds' as const, label: t('sleep.light'), color: '#38bdf8', target: 0.5 },
-    { key: 'awakeSleepSeconds' as const, label: t('sleep.awake'), color: '#404040', target: 0.05 },
+    { key: 'deepSleepSeconds' as const, label: t('sleep.deep'), color: SERIES[0] },
+    { key: 'remSleepSeconds' as const, label: t('sleep.rem'), color: SERIES[1] },
+    { key: 'lightSleepSeconds' as const, label: t('sleep.light'), color: SERIES[2] },
+    { key: 'awakeSleepSeconds' as const, label: t('sleep.awake'), color: 'var(--rule)' },
   ];
 
+  const extras: Array<[string, string]> = [];
+  if (sleep.averageSpO2 > 0) extras.push([t('sleep.spo2'), `${sleep.averageSpO2.toFixed(1)}%`]);
+  if (sleep.averageHRV > 0) extras.push([t('sleep.hrvNight'), `${sleep.averageHRV} ms`]);
+  if (sleep.averageRespiration > 0) extras.push([t('sleep.resp'), sleep.averageRespiration.toFixed(1)]);
+
   return (
-    <div className="card">
-      <div className="card-header">
-        <Moon size={14} className="text-sleep" />
-        <span>{t('sleep.title')}</span>
-        <span className="ml-auto flex flex-col items-end">
-          <span className="text-sm font-bold text-primary leading-none">
+    <LogSection
+      label={t('sleep.title')}
+      figure={
+        <span className="flex flex-col items-end">
+          {/* A demo score is an estimate and is set in graphite, not ink. */}
+          <span className={isDemo ? 'estimated text-entry' : 'measured text-entry'}>
             {sleep.sleepScore}
-            <span className="text-xs text-secondary ml-0.5">/ 100</span>
+            <span className="text-note font-normal text-faint ml-0.5">/ 100</span>
           </span>
-          <span className="text-[9px] text-muted leading-none mt-0.5">
+          <span className="font-serif text-note italic text-faint">
             {isDemo ? t('sleep.estimated') : t('sleep.garmin')}
           </span>
         </span>
-      </div>
-
-      {/* Duration */}
-      <div className="flex items-end gap-2 mb-4">
-        <span className="text-3xl font-black text-primary leading-none">
-          {formatDuration(sleep.totalSleepSeconds)}
-        </span>
-        <span className="text-xs text-secondary mb-1">
+      }
+    >
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className="measured text-verdict">{formatDuration(sleep.totalSleepSeconds)}</span>
+        <span className="font-serif text-note italic text-pencil">
           {totalHours.toFixed(1)} {t('sleep.recommended')}
         </span>
       </div>
 
-      {/* Duration bar */}
-      <div className="w-full h-2 bg-muted rounded-full mb-4 overflow-hidden">
+      {/* Duration against an 8h page width */}
+      <div className="w-full h-1.5 bg-wash border border-rule mb-4">
         <div
-          className="h-full rounded-full transition-all duration-700"
+          className="h-full transition-all duration-700"
           style={{
             width: `${Math.min(100, (totalHours / 8) * 100)}%`,
-            backgroundColor: totalHours >= 7 ? '#818cf8' : totalHours >= 6 ? '#facc15' : '#f87171',
+            backgroundColor: totalHours >= 7 ? SERIES[0] : totalHours >= 6 ? CAUTION : STOP,
           }}
         />
       </div>
 
-      {/* Sleep stages */}
-      <div className="flex gap-1 h-6 rounded-lg overflow-hidden mb-3">
+      {/* Stages, stacked */}
+      <div className="flex h-5 mb-2 border border-rule">
         {STAGES.map(s => {
-          const pct = sleep.totalSleepSeconds
-            ? (sleep[s.key] / sleep.totalSleepSeconds) * 100
-            : 0;
+          const pct = sleep.totalSleepSeconds ? (sleep[s.key] / sleep.totalSleepSeconds) * 100 : 0;
           return (
             <div
               key={s.key}
@@ -80,61 +92,43 @@ export default function SleepCard({ sleep, benchmark, isDemo }: Props) {
         })}
       </div>
 
-      {/* Stage legend */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+      <dl className="grid grid-cols-2 gap-x-5 gap-y-1">
         {STAGES.map(s => {
           const pct = sleep.totalSleepSeconds
             ? Math.round((sleep[s.key] / sleep.totalSleepSeconds) * 100)
             : 0;
           return (
-            <div key={s.key} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-              <span className="text-xs text-secondary truncate">{s.label}</span>
-              <span className="text-xs text-primary ml-auto font-medium">
+            <div key={s.key} className="flex items-baseline gap-2">
+              <span
+                aria-hidden="true"
+                className="w-2 h-2 shrink-0 self-center"
+                style={{ backgroundColor: s.color }}
+              />
+              <dt className="text-note text-pencil truncate">{s.label}</dt>
+              <dd className="measured text-note ml-auto">
                 {formatDuration(sleep[s.key])}
-                <span className="text-muted ml-1">{pct}%</span>
-              </span>
+                <span className="text-faint font-normal ml-1">{pct}%</span>
+              </dd>
             </div>
           );
         })}
-      </div>
+      </dl>
 
-      {/* Extra stats */}
-      {(sleep.averageSpO2 > 0 || sleep.averageHRV > 0) && (
-        <div className="flex gap-4 mt-3 pt-3 border-t border-border">
-          {sleep.averageSpO2 > 0 && (
-            <div className="flex flex-col">
-              <span className="text-[10px] text-secondary uppercase tracking-widest">{t('sleep.spo2')}</span>
-              <span className="text-sm font-bold text-primary">{sleep.averageSpO2.toFixed(1)}%</span>
+      {extras.length > 0 && (
+        <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1 mt-3 pt-3 border-t border-rule">
+          {extras.map(([label, value]) => (
+            <div key={label} className="flex items-baseline gap-1.5">
+              <span className="font-serif text-note italic text-faint">{label}</span>
+              <span className="measured text-note">{value}</span>
             </div>
-          )}
-          {sleep.averageHRV > 0 && (
-            <div className="flex flex-col">
-              <span className="text-[10px] text-secondary uppercase tracking-widest">{t('sleep.hrvNight')}</span>
-              <span className="text-sm font-bold text-primary">{sleep.averageHRV} ms</span>
-            </div>
-          )}
-          {sleep.averageRespiration > 0 && (
-            <div className="flex flex-col">
-              <span className="text-[10px] text-secondary uppercase tracking-widest">{t('sleep.resp')}</span>
-              <span className="text-sm font-bold text-primary">{sleep.averageRespiration.toFixed(1)}</span>
-            </div>
-          )}
-          <div className="flex items-center gap-1 ml-auto text-xs text-secondary">
-            <Zap size={11} className="text-strain" />
-            <span>
-              {new Date(sleep.startTime).toLocaleTimeString(locale === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-              {' → '}
-              {new Date(sleep.endTime).toLocaleTimeString(locale === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
+          ))}
+          <span className="ml-auto text-note text-pencil figures">
+            {timeFmt(sleep.startTime)} → {timeFmt(sleep.endTime)}
+          </span>
         </div>
       )}
 
-      {/* Demographic benchmark — only shown when profile is set */}
-      {benchmark && sleep.totalSleepSeconds > 0 && (
-        <BenchmarkBadge benchmark={benchmark} />
-      )}
-    </div>
+      {benchmark && sleep.totalSleepSeconds > 0 && <BenchmarkBadge benchmark={benchmark} />}
+    </LogSection>
   );
 }

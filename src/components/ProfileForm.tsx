@@ -130,7 +130,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
 
       {/* Name */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+        <label className="font-serif text-note italic text-pencil">
           {t('profile.name')} <span className="text-muted font-normal normal-case">{t('profile.nameOptional')}</span>
         </label>
         <input
@@ -145,7 +145,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
 
       {/* Age */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+        <label className="font-serif text-note italic text-pencil">
           {t('profile.age')}
         </label>
         <input
@@ -164,7 +164,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
 
       {/* Sex */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-secondary uppercase tracking-widest">{t('profile.sex')}</label>
+        <label className="font-serif text-note italic text-pencil">{t('profile.sex')}</label>
         <div className="flex gap-2">
           <OptionButton value="male" current={sex} label={t('profile.male')} onClick={setSex} />
           <OptionButton value="female" current={sex} label={t('profile.female')} onClick={setSex} />
@@ -173,7 +173,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
 
       {/* Units toggle */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-secondary uppercase tracking-widest">{t('profile.units')}</label>
+        <label className="font-serif text-note italic text-pencil">{t('profile.units')}</label>
         <div className="flex gap-2">
           <OptionButton value="metric"   current={units} label={t('profile.metric')}   onClick={switchUnits} />
           <OptionButton value="imperial" current={units} label={t('profile.imperial')} onClick={switchUnits} />
@@ -184,7 +184,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
       {units === 'metric' ? (
         <div className="flex gap-3">
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+            <label className="font-serif text-note italic text-pencil">
               {t('profile.height')} <span className="text-muted font-normal normal-case">{t('profile.heightUnit')}</span>
             </label>
             <input
@@ -198,7 +198,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
             />
           </div>
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+            <label className="font-serif text-note italic text-pencil">
               {t('profile.weight')} <span className="text-muted font-normal normal-case">{t('profile.weightUnit')}</span>
             </label>
             <input
@@ -217,7 +217,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
         <div className="flex gap-3">
           {/* Height: ft + in */}
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+            <label className="font-serif text-note italic text-pencil">
               {t('profile.height')} <span className="text-muted font-normal normal-case">(ft / {t('profile.heightInLabel')})</span>
             </label>
             <div className="flex gap-2">
@@ -243,7 +243,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
           </div>
           {/* Weight: lbs */}
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+            <label className="font-serif text-note italic text-pencil">
               {t('profile.weight')} <span className="text-muted font-normal normal-case">{t('profile.weightLbsUnit')}</span>
             </label>
             <input
@@ -264,7 +264,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
       {/* Weight goal — only shown when weight is entered */}
       {weightNum > 0 && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-secondary uppercase tracking-widest">
+          <label className="font-serif text-note italic text-pencil">
             {t('profile.weightGoalLabel')} <span className="text-muted font-normal normal-case">{t('profile.weightGoalOptional')}</span>
           </label>
           <div className="flex gap-2">
@@ -277,7 +277,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
 
       {/* Fitness level */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-secondary uppercase tracking-widest">{t('profile.fitnessLevel')}</label>
+        <label className="font-serif text-note italic text-pencil">{t('profile.fitnessLevel')}</label>
         <div className="grid grid-cols-2 gap-2">
           <OptionButton value="beginner"     current={fitnessLevel} label={t('profile.fitnessLevels.beginner')}     onClick={setFitnessLevel} />
           <OptionButton value="intermediate" current={fitnessLevel} label={t('profile.fitnessLevels.intermediate')} onClick={setFitnessLevel} />
@@ -294,7 +294,7 @@ export default function ProfileForm({ initial, onSave, onCancel, ctaLabel }: Pro
 
       {/* Goal */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-secondary uppercase tracking-widest">{t('profile.goal')}</label>
+        <label className="font-serif text-note italic text-pencil">{t('profile.goal')}</label>
         <div className="grid grid-cols-2 gap-2">
           <OptionButton value="recovery"       current={goal} label={t('profile.goals.recovery')}       onClick={setGoal} />
           <OptionButton value="performance"    current={goal} label={t('profile.goals.performance')}    onClick={setGoal} />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Sparkles, RefreshCw, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import type { WeeklyTrend } from '@/lib/types';
 import type { UserProfile } from '@/lib/types';
 import { useLang } from '@/lib/i18n';
@@ -109,46 +109,38 @@ export default function WeeklySummaryCard({ trend, profile }: Props) {
   // ── Loading skeleton ─────────────────────────────────────────────────────────
   if (status === 'loading') {
     return (
-      <div className="card">
-        <div className="card-header mb-4">
-          <Sparkles size={14} className="text-purple-400" />
-          <span className="text-purple-400">{t('weeklySummary.title')}</span>
-          <span className="ml-auto text-[10px] text-muted">{t('weeklySummary.badge')}</span>
+      <section className="border-t border-rule pt-3">
+        <div className="flex items-baseline gap-3 mb-2">
+          <h2 className="block-label mb-0">{t('weeklySummary.title')}</h2>
+          <span className="ml-auto font-serif text-note italic text-faint">
+            {t('weeklySummary.badge')}
+          </span>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 pl-3 border-l border-rule">
           {[100, 90, 75].map((w, i) => (
-            <div
-              key={i}
-              className="h-3 rounded animate-pulse bg-border"
-              style={{ width: `${w}%` }}
-            />
+            <div key={i} className="h-2.5 bg-rule animate-pulse" style={{ width: `${w}%` }} />
           ))}
         </div>
-        <p className="text-[10px] text-muted mt-3 text-center animate-pulse">
-          {t('weeklySummary.generating')}
-        </p>
-      </div>
+        <p className="marginalia mt-2 border-l-0 pl-0">{t('weeklySummary.generating')}</p>
+      </section>
     );
   }
 
   // ── Error state ──────────────────────────────────────────────────────────────
   if (status === 'error') {
     return (
-      <div className="card border-dashed">
-        <div className="flex items-center gap-3">
-          <AlertCircle size={16} className="text-muted flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-xs text-secondary font-medium">{t('weeklySummary.errorTitle')}</p>
-            <p className="text-[10px] text-muted mt-0.5">{t('weeklySummary.errorDesc')}</p>
-          </div>
-          <button
-            onClick={() => generate(true)}
-            className="text-[10px] text-secondary hover:text-primary transition-colors underline"
-          >
-            {t('weeklySummary.retry')}
-          </button>
-        </div>
-      </div>
+      <section className="border-l-2 border-dashed border-rule pl-3 py-1">
+        <p className="text-entry text-pencil">{t('weeklySummary.errorTitle')}</p>
+        <p className="font-serif text-note italic text-faint mt-0.5">
+          {t('weeklySummary.errorDesc')}
+        </p>
+        <button
+          onClick={() => generate(true)}
+          className="mt-1 font-serif text-note italic text-pencil hover:text-ink underline transition-colors"
+        >
+          {t('weeklySummary.retry')}
+        </button>
+      </section>
     );
   }
 
@@ -156,48 +148,42 @@ export default function WeeklySummaryCard({ trend, profile }: Props) {
   if (status === 'idle') return null;
 
   // ── Done ─────────────────────────────────────────────────────────────────────
+  // The coach speaks in the margin, in the serif, and is labelled as the coach.
+  // Nothing here is a measurement, so nothing here is set in ink.
   return (
-    <div className="card">
-      {/* Header */}
-      <div className="card-header mb-3">
-        <Sparkles size={14} className="text-purple-400" />
-        <span className="text-purple-400">{t('weeklySummary.title')}</span>
+    <section className="border-t border-rule pt-3">
+      <div className="flex items-baseline gap-3 mb-2">
+        <h2 className="block-label mb-0">{t('weeklySummary.title')}</h2>
         <span className="ml-auto flex items-center gap-2">
-          <span className="text-[10px] text-muted">{t('weeklySummary.badge')}</span>
+          <span className="font-serif text-note italic text-faint">
+            {t('weeklySummary.badge')}
+          </span>
           <button
             onClick={() => generate(true)}
             title={t('weeklySummary.regenerate')}
-            className="p-1 rounded-lg hover:bg-surface text-muted hover:text-secondary transition-colors"
+            aria-label={t('weeklySummary.regenerate')}
+            className="p-1 text-faint hover:text-ink transition-colors"
           >
             <RefreshCw size={11} />
           </button>
         </span>
       </div>
 
-      {/* Summary text — collapsible */}
-      <div className="relative">
-        <p
-          className="text-sm text-secondary leading-relaxed whitespace-pre-line transition-all duration-300"
-          style={expanded ? undefined : {
-            display: '-webkit-box',
-            WebkitLineClamp: 5,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {stripMarkdown(summary)}
-        </p>
+      <p
+        className="prose-log text-entry text-pencil whitespace-pre-line pl-3 border-l border-rule"
+        style={expanded ? undefined : {
+          display: '-webkit-box',
+          WebkitLineClamp: 5,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {stripMarkdown(summary)}
+      </p>
 
-        {/* Fade overlay when collapsed */}
-        {!expanded && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#111111] to-transparent pointer-events-none" />
-        )}
-      </div>
-
-      {/* Expand / Collapse button */}
       <button
         onClick={() => setExpanded(e => !e)}
-        className="mt-2 flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300 transition-colors"
+        className="mt-1.5 flex items-center gap-1 font-serif text-note italic text-pencil hover:text-ink transition-colors"
       >
         {expanded ? (
           <><ChevronUp size={11} />{t('weeklySummary.readLess')}</>
@@ -206,9 +192,9 @@ export default function WeeklySummaryCard({ trend, profile }: Props) {
         )}
       </button>
 
-      <p className="text-[9px] text-muted mt-2 text-right">
+      <p className="font-serif text-note italic text-faint mt-1 text-right">
         {t('weeklySummary.footer')}
       </p>
-    </div>
+    </section>
   );
 }

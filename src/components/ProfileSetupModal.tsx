@@ -19,7 +19,7 @@ export default function ProfileSetupModal({ onComplete }: Props) {
 
           {/* Logo / Icon */}
           <div className="flex flex-col items-center gap-3 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <div className="w-16 h-16 rounded bg-primary/10 border border-primary/20 flex items-center justify-center">
               <Activity size={32} className="text-primary" />
             </div>
             <div>
@@ -31,7 +31,7 @@ export default function ProfileSetupModal({ onComplete }: Props) {
           </div>
 
           {/* Why this matters */}
-          <div className="bg-surface/60 border border-border rounded-2xl px-4 py-3 flex gap-3">
+          <div className="bg-surface/60 border border-border rounded px-4 py-3 flex gap-3">
             <span className="text-lg">📊</span>
             <p className="text-xs text-secondary leading-relaxed">
               {t('profile.setupExplainer')}
@@ -39,7 +39,7 @@ export default function ProfileSetupModal({ onComplete }: Props) {
           </div>
 
           {/* Form card */}
-          <div className="bg-surface border border-border rounded-2xl p-4">
+          <div className="bg-surface border border-border rounded p-4">
             <ProfileForm
               onSave={onComplete}
               ctaLabel={t('profile.setupCta')}

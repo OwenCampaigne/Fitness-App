@@ -2,10 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── The training log ────────────────────────────────────────────────────────
+   Ink is measured, pencil is estimated. That distinction is the design, so it
+   lives in tokens rather than in individual components where it would drift.
+
+   Day is paper. Night is the same log read under a headlamp — the ground goes
+   dark but the ink/pencil relationship survives, because a 6am session outdoors
+   and a 10pm one indoors are the same book. */
+
 :root {
-  --color-bg: #080808;
-  --color-surface: #111111;
-  --color-border: #1f1f1f;
+  --paper: #e8e9e3;
+  --wash: #dfe1d9;
+  --rule: #c9ccc2;
+  --ink: #1c2a33;
+  --pencil: #6b7378;
+  --faint: #9aa09f;
+
+  --ready: #2f6b4f;
+  --caution: #9a6b1f;
+  --stop: #98332b;
+
+  --chart-1: #45607a;
+  --chart-2: #6b5b7f;
+  --chart-3: #3f6f78;
+  --chart-4: #8a5a3c;
+  --chart-5: #7a6a34;
+}
+
+/* Night follows the device unless the page asks for it explicitly, so a 6am
+   session in the dark does not open with a white page. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --paper: #14181a;
+    --wash: #1c2225;
+    --rule: #2e3639;
+    --ink: #e6e8e2;
+    --pencil: #98a1a4;
+    --faint: #6a7377;
+
+    --ready: #6fae8b;
+    --caution: #d0a052;
+    --stop: #d4726a;
+
+    --chart-1: #7c9bba;
+    --chart-2: #a394bb;
+    --chart-3: #77aab3;
+    --chart-4: #c2937a;
+    --chart-5: #b3a373;
+  }
+}
+
+.dark {
+  --paper: #14181a;
+  --wash: #1c2225;
+  --rule: #2e3639;
+  --ink: #e6e8e2;
+  --pencil: #98a1a4;
+  --faint: #6a7377;
+
+  --ready: #6fae8b;
+  --caution: #d0a052;
+  --stop: #d4726a;
+
+  --chart-1: #7c9bba;
+  --chart-2: #a394bb;
+  --chart-3: #77aab3;
+  --chart-4: #c2937a;
+  --chart-5: #b3a373;
 }
 
 * {
@@ -14,9 +77,9 @@
 
 html,
 body {
-  background-color: var(--color-bg);
-  color: #f5f5f5;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-atkinson), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
@@ -27,13 +90,76 @@ body {
 }
 
 @layer components {
-  .card {
-    @apply bg-surface rounded-2xl border border-border p-4;
+  /* ── Entries ──────────────────────────────────────────────────────────────
+     No cards. A log is ruled lines, and the rule between two entries is what
+     separates them — so the border is structural, not decoration. */
+  .entry {
+    @apply border-b border-rule py-3;
+  }
+  .entry:last-child {
+    @apply border-b-0;
   }
 
-  .card-header {
-    @apply flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary uppercase mb-3;
+  /* A block's label hangs in the left margin, the way a diary is written. */
+  .block-label {
+    @apply font-serif text-note italic text-pencil mb-1;
   }
+
+  /* ── Ink and pencil ───────────────────────────────────────────────────────
+     The whole system in two classes. `.measured` is something the app watched
+     happen; `.estimated` is something it worked out and could be wrong about.
+     Never style an estimate as measured to make a screen look more confident. */
+  .measured {
+    @apply text-ink font-medium;
+    font-variant-numeric: tabular-nums;
+  }
+  .estimated {
+    @apply text-pencil font-normal;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The coach speaks in the margin, not from inside a callout box. */
+  .marginalia {
+    @apply font-serif text-note italic text-pencil leading-relaxed pl-3 border-l border-rule;
+  }
+
+  .prose-log {
+    @apply font-serif text-prose text-ink;
+    max-width: 62ch;
+  }
+
+  /* Numbers you compare down a column have to line up. */
+  .figures {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Legacy dashboard card, kept so unmigrated pages still render. Flattened
+     towards paper rather than left as a floating rounded panel. */
+  .card {
+    @apply bg-wash border border-rule p-4;
+    border-radius: 3px;
+  }
+  .card-header {
+    @apply font-serif text-note italic text-pencil mb-3;
+  }
+}
+
+/* A person who asked for less motion gets less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Keyboard focus has to be visible; this is read one-handed and tabbed. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 
 /* Recharts overrides */
@@ -53,6 +179,6 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--rule);
   border-radius: 2px;
 }
