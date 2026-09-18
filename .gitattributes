@@ -1,0 +1,16 @@
+# Default: let git normalise text in the repo, check out native on each OS.
+* text=auto
+
+# These run on the Pi. A CRLF here fails as `bad interpreter: /usr/bin/env
+# bash^M` — authored on Windows, unrunnable on Linux, with an error that does
+# not name the cause. Force LF regardless of the checkout platform.
+*.sh            text eol=lf
+*.service       text eol=lf
+deploy/*        text eol=lf
+*.sql           text eol=lf
+
+# Binary, never touched.
+*.png           binary
+*.jpeg          binary
+*.pdf           binary
+*.db            binary
