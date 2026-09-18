@@ -1,3 +1,5 @@
+import type { ActivitySplits } from './splits';
+
 export interface SleepData {
   totalSleepSeconds: number;
   deepSleepSeconds: number;
@@ -44,6 +46,17 @@ export interface ActivityData {
   maxHR: number;
   type: string;
   garminActivityId?: string;
+  // ── Run detail (framework §3: `activities` wants more than averages) ────────
+  // All optional: every one of these is absent on an indoor row, a manual entry
+  // or a device that did not record it, and the sync must store null rather
+  // than invent a zero.
+  /** Metres, as Garmin reports it. */
+  distanceM?: number;
+  /** Steps per minute, both legs. */
+  cadenceSpm?: number;
+  elevationGainM?: number;
+  /** Per-split laps, when the sync pulled them. See `src/lib/splits.ts`. */
+  splits?: ActivitySplits | null;
 }
 
 export interface RecoveryData {

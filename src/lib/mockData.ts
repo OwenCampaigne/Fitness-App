@@ -1,7 +1,122 @@
 import { format, subDays } from 'date-fns';
 import type { DailyMetrics } from './types';
+import { SPLITS_SCHEMA_VERSION, type ActivitySplits, type RunSplit } from './splits';
 
 const today = new Date();
+
+// ── Mock splits (framework §16) ───────────────────────────────────────────────
+// Every feature works in mock mode first, and decoupling is the one that most
+// needs it: real per-split data arrives only from a watch, bad long runs are
+// rare, and waiting for one to appear is not a test strategy. These generators
+// produce laps whose shape matches what `parseGarminSplits` emits, so the mock
+// path runs through the same parser, the same gate and the same maths as live.
+
+export interface MockSplitsSpec {
+  /** Number of full kilometre laps. */
+  km: number
+  /** Seconds per kilometre at the start of the run. */
+  startPaceSecPerKm: number
+  /** Seconds per kilometre at the end — equal to the start means a held pace. */
+  endPaceSecPerKm: number
+  startHr: number
+  endHr: number
+  /** Add the ragged closing lap Garmin always records. */
+  tailKm?: number
+  startTime?: Date
+}
+
+/**
+ * Build a lap list that drifts linearly from start to end.
+ *
+ * Linear rather than random on purpose: a mock whose verdict changes between
+ * runs is useless for demonstrating a band, and the gate is deterministic.
+ */
+export function buildMockSplits(spec: MockSplitsSpec, activityId = 'mock-run'): ActivitySplits {
+  const start = spec.startTime ?? new Date(today.getTime() - 3600_000);
+  let clock = 0;
+  const lerp = (a: number, b: number, i: number, n: number) =>
+    n <= 1 ? a : a + ((b - a) * i) / (n - 1);
+
+  const splits: RunSplit[] = Array.from({ length: spec.km }, (_, i) => {
+    const durationSec = Math.round(lerp(spec.startPaceSecPerKm, spec.endPaceSecPerKm, i, spec.km));
+    const startTimeGmt = new Date(start.getTime() + clock * 1000).toISOString();
+    clock += durationSec;
+    const hr = Math.round(lerp(spec.startHr, spec.endHr, i, spec.km));
+    return {
+      index: i + 1,
+      distanceKm: 1,
+      durationSec,
+      avgHr: hr,
+      maxHr: hr + 7,
+      paceSecPerKm: durationSec,
+      elevationGainM: 4,
+      elevationLossM: 3,
+      avgCadenceSpm: 168,
+      startTimeGmt,
+    };
+  });
+
+  if (spec.tailKm && spec.tailKm > 0) {
+    const durationSec = Math.round(spec.endPaceSecPerKm * spec.tailKm);
+    splits.push({
+      index: splits.length + 1,
+      distanceKm: spec.tailKm,
+      durationSec,
+      avgHr: spec.endHr,
+      maxHr: spec.endHr + 7,
+      paceSecPerKm: spec.endPaceSecPerKm,
+      elevationGainM: 1,
+      elevationLossM: 1,
+      avgCadenceSpm: 170,
+      startTimeGmt: new Date(start.getTime() + clock * 1000).toISOString(),
+    });
+  }
+
+  return {
+    version: SPLITS_SCHEMA_VERSION,
+    source: 'mock',
+    activityId,
+    fetchedAt: today.toISOString(),
+    splits,
+  };
+}
+
+/**
+ * The default mock long run: 10 km held at 5:48/km with heart rate drifting
+ * 142 → 151. Lands at roughly 3% decoupling — a base that holds, which is the
+ * state the app should look right in before it is asked to look right in the
+ * broken one.
+ */
+export const mockRunSplits: ActivitySplits = buildMockSplits(
+  { km: 10, startPaceSecPerKm: 348, endPaceSecPerKm: 348, startHr: 142, endHr: 151, tailKm: 0.27 },
+  'mock-long-run',
+);
+
+/** A walk/run session: the shape the steady-state gate must refuse. */
+export const mockWalkRunSplits: ActivitySplits = {
+  version: SPLITS_SCHEMA_VERSION,
+  source: 'mock',
+  activityId: 'mock-walk-run',
+  fetchedAt: today.toISOString(),
+  splits: Array.from({ length: 12 }, (_, i): RunSplit => {
+    const running = i % 2 === 0;
+    const durationSec = running ? 360 : 180;
+    const distanceKm = running ? 1 : 0.25;
+    const hr = running ? 148 : 116;
+    return {
+      index: i + 1,
+      distanceKm,
+      durationSec,
+      avgHr: hr,
+      maxHr: hr + 10,
+      paceSecPerKm: Math.round(durationSec / distanceKm),
+      elevationGainM: 2,
+      elevationLossM: 2,
+      avgCadenceSpm: running ? 166 : 120,
+      startTimeGmt: null,
+    };
+  }),
+};
 
 export const mockData: DailyMetrics = {
   date: format(today, 'yyyy-MM-dd'),
@@ -90,6 +205,10 @@ export const mockData: DailyMetrics = {
       averageHR: 151,
       maxHR: 176,
       type: 'running',
+      distanceM: 10270,
+      cadenceSpm: 168,
+      elevationGainM: 43,
+      splits: mockRunSplits,
     },
   ],
   steps: 8432,

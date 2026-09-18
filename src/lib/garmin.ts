@@ -8,6 +8,7 @@ import {
   calculateStrainScore, calculateDailyStrain, getHRVStatus,
 } from './scoring';
 import { mockData } from './mockData';
+import { type ActivitySplits, parseGarminSplits } from './splits';
 
 // ─── In-memory cache ──────────────────────────────────────────────────────────
 interface CacheEntry { data: DailyMetrics; ts: number }
@@ -26,19 +27,28 @@ async function getClient(): Promise<unknown> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { GarminConnect } = require('garmin-connect');
 
-  const hasCredentials = !!(process.env.GARMIN_USERNAME && process.env.GARMIN_PASSWORD);
-  if (!hasCredentials) return null;
-
-  const client = new GarminConnect({
-    username: process.env.GARMIN_USERNAME,
-    password: process.env.GARMIN_PASSWORD,
-  });
-
   // ── Strategy 1: restore from pre-fetched OAuth tokens (no login needed) ──
   const rawOauth1 = process.env.GARMIN_OAUTH1;
   const rawOauth2 = process.env.GARMIN_OAUTH2;
 
-  if (rawOauth1 && rawOauth2) {
+  const hasPassword = !!(process.env.GARMIN_USERNAME && process.env.GARMIN_PASSWORD);
+  const hasTokens = !!(rawOauth1 && rawOauth2);
+
+  // Tokens alone are enough, and are the *recommended* setup for an account
+  // with two-factor auth — GARMIN-SETUP.md tells you to replace the username
+  // and password with them. Requiring a password here meant anyone who
+  // followed that advice silently fell back to demo data forever (§20: auth is
+  // the fragile dependency, so its preconditions have to match the documented
+  // path exactly).
+  if (!hasPassword && !hasTokens) return null;
+
+  const client = new GarminConnect(
+    hasPassword
+      ? { username: process.env.GARMIN_USERNAME, password: process.env.GARMIN_PASSWORD }
+      : undefined,
+  );
+
+  if (hasTokens) {
     try {
       const oauth1 = JSON.parse(rawOauth1);
       const oauth2 = JSON.parse(rawOauth2);
@@ -53,6 +63,14 @@ async function getClient(): Promise<unknown> {
   }
 
   // ── Strategy 2: full login (triggers MFA/rate-limit risk) ──────────────
+  // Only possible with a password; token-only setups have already returned or
+  // logged a restore failure, and there is nothing here for them to try.
+  if (!hasPassword) {
+    console.error('[Garmin] OAuth token restore failed and no password is set — cannot connect.');
+    garminClient = null;
+    return null;
+  }
+
   try {
     await client.login();
     garminClient = client;
@@ -150,6 +168,15 @@ function parseStress(raw: Record<string, unknown>): StressData {
   };
 }
 
+/** First finite number among the given keys, else undefined. */
+function numField(act: Record<string, unknown>, ...keys: string[]): number | undefined {
+  for (const k of keys) {
+    const v = act[k];
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+  }
+  return undefined;
+}
+
 function parseActivities(raw: unknown[]): ActivityData[] {
   if (!Array.isArray(raw)) return [];
   return raw.slice(0, 5).map((a: unknown) => {
@@ -169,8 +196,101 @@ function parseActivities(raw: unknown[]): ActivityData[] {
       maxHR,
       type: (type?.typeKey ?? type?.key ?? 'other') as string,
       garminActivityId,
+      // ── Run detail (framework §3) ──────────────────────────────────────────
+      // The summary already carries distance, cadence and climb; the sync was
+      // simply dropping them on the floor, which is why pace — and therefore
+      // decoupling — could never be computed. Left undefined rather than zeroed
+      // when absent, so the DB stores null and nothing downstream reads a
+      // missing treadmill distance as "ran zero kilometres".
+      distanceM: numField(act, 'distance', 'distanceInMeters'),
+      cadenceSpm: numField(
+        act,
+        'averageRunningCadenceInStepsPerMinute',
+        'averageDoubleCadence',
+        'averageRunCadence',
+      ),
+      elevationGainM: numField(act, 'elevationGain', 'totalAscent'),
     };
   });
+}
+
+// ─── Per-split (lap) data ─────────────────────────────────────────────────────
+// Framework §7 wants aerobic decoupling, which needs first-half-versus-second-
+// half data. §20 says never auth in a hot path and cache hard, so this is
+// deliberately *not* called from fetchDailyMetrics: the nightly sync pulls
+// splits once per activity and writes them to SQLite, and every read path goes
+// to the DB. Splits of a finished activity never change, so the cache is a day
+// rather than fifteen minutes.
+
+interface SplitsCacheEntry { data: ActivitySplits | null; ts: number }
+const splitsCache = new Map<string, SplitsCacheEntry>();
+const SPLITS_TTL = 24 * 60 * 60 * 1000; // 24h — a completed activity is immutable
+
+/**
+ * Endpoints tried in order. `splits` is the lap list every running activity
+ * has; `typedsplits` is the interval-aware view some devices populate instead.
+ * Both are undocumented, which is precisely why there are two.
+ */
+function splitsEndpoints(apiBase: string, activityId: string): string[] {
+  return [
+    `${apiBase}/activity-service/activity/${activityId}/splits`,
+    `${apiBase}/activity-service/activity/${activityId}/typedsplits`,
+  ];
+}
+
+/**
+ * Pull the laps for one activity, or null if Garmin has none.
+ *
+ * Never throws. A 401, a 429 or a device that recorded no laps must all leave
+ * the caller with stale-or-absent data and a log line, never a failed sync
+ * (framework §20) — the activity row still gets written with its averages.
+ */
+export async function fetchActivitySplits(
+  activityId: string,
+  opts: { force?: boolean } = {},
+): Promise<ActivitySplits | null> {
+  if (!activityId) return null;
+
+  if (!opts.force) {
+    const cached = splitsCache.get(activityId);
+    if (cached && Date.now() - cached.ts < SPLITS_TTL) return cached.data;
+  }
+
+  const client = await getClient();
+  if (!client) return null;
+
+  const gc = client as GCClient;
+  const GC_API = 'https://connectapi.garmin.com';
+
+  for (const url of splitsEndpoints(GC_API, activityId)) {
+    try {
+      const raw = await gc.get(url);
+      const parsed = parseGarminSplits(raw, { activityId });
+      if (parsed) {
+        splitsCache.set(activityId, { data: parsed, ts: Date.now() });
+        return parsed;
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[Garmin] splits fetch failed for ${activityId}: ${msg}`);
+      // A rate limit will hit the next endpoint too — stop rather than spend
+      // the remaining budget proving it.
+      if (msg.includes('429')) {
+        splitsCache.set(activityId, { data: null, ts: Date.now() });
+        return null;
+      }
+    }
+  }
+
+  // Cache the miss too: re-asking Garmin every sync for laps a treadmill run
+  // never had is how a backfill earns a 429.
+  splitsCache.set(activityId, { data: null, ts: Date.now() });
+  return null;
+}
+
+/** Exposed for tests and for the backfill's `--refresh-splits` path. */
+export function clearSplitsCache(): void {
+  splitsCache.clear();
 }
 
 // ─── Main fetch ───────────────────────────────────────────────────────────────
