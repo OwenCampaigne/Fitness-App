@@ -11,15 +11,18 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#080808',
     orientation: 'portrait',
     categories: ['health', 'fitness'],
+    // Static files under public/, built by `npx tsx scripts/generate-icons.ts`.
+    // They used to be `next/og` routes, which cannot even be imported on
+    // Windows and so broke the build for anyone developing locally.
     icons: [
       {
-        src: '/icon192',
+        src: '/icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/icon512',
+        src: '/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
